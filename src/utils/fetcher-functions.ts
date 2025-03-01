@@ -1,8 +1,4 @@
-
-
-import { string } from "zod";
 import strapi from "./strapi";
-import { an } from "node_modules/@faker-js/faker/dist/airline-BXaRegOM";
 
 const getDjQuestions = async () => {
     try {
