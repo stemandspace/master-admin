@@ -15,6 +15,13 @@ const userRoleSchema = z.union([
   z.literal('manager'),
 ])
 
+
+const AnsweringSchema = z.object({
+  id: z.string(),
+  question: z.string(),
+  createdAt: z.string()
+})
+
 const userSchema = z.object({
   id: z.string(),
   firstName: z.string(),
@@ -30,3 +37,6 @@ const userSchema = z.object({
 export type User = z.infer<typeof userSchema>
 
 export const userListSchema = z.array(userSchema)
+
+export type Answering = z.infer<typeof AnsweringSchema>
+export const answeringSchema = z.array(AnsweringSchema)

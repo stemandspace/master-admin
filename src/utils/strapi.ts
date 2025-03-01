@@ -1,6 +1,6 @@
 import axios from "axios";
 const BASEURL = `https://api.cosmickids.club/api`;
-const strapii = axios.create({
+const strapi = axios.create({
     baseURL: BASEURL,
     headers: {
         'Content-Type': 'application/json',
@@ -8,4 +8,4 @@ const strapii = axios.create({
     },
 })
 
-export default strapii;
+export default strapi;

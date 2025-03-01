@@ -15,7 +15,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
-import { Route as djAnsweringImport } from './routes/(dj)/answering'
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
@@ -153,12 +152,6 @@ const AuthenticatedSettingsRouteLazyRoute =
   } as any).lazy(() =>
     import('./routes/_authenticated/settings/route.lazy').then((d) => d.Route),
   )
-
-const djAnsweringRoute = djAnsweringImport.update({
-  id: '/(dj)/answering',
-  path: '/answering',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 
 const authSignInRoute = authSignInImport.update({
   id: '/(auth)/sign-in',
@@ -309,13 +302,6 @@ declare module '@tanstack/react-router' {
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof authSignInImport
-      parentRoute: typeof rootRoute
-    }
-    '/(dj)/answering': {
-      id: '/(dj)/answering'
-      path: '/answering'
-      fullPath: '/answering'
-      preLoaderRoute: typeof djAnsweringImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated/settings': {
@@ -472,17 +458,17 @@ interface AuthenticatedSettingsRouteLazyRouteChildren {
 }
 
 const AuthenticatedSettingsRouteLazyRouteChildren: AuthenticatedSettingsRouteLazyRouteChildren =
-{
-  AuthenticatedSettingsAccountLazyRoute:
-    AuthenticatedSettingsAccountLazyRoute,
-  AuthenticatedSettingsAppearanceLazyRoute:
-    AuthenticatedSettingsAppearanceLazyRoute,
-  AuthenticatedSettingsDisplayLazyRoute:
-    AuthenticatedSettingsDisplayLazyRoute,
-  AuthenticatedSettingsNotificationsLazyRoute:
-    AuthenticatedSettingsNotificationsLazyRoute,
-  AuthenticatedSettingsIndexLazyRoute: AuthenticatedSettingsIndexLazyRoute,
-}
+  {
+    AuthenticatedSettingsAccountLazyRoute:
+      AuthenticatedSettingsAccountLazyRoute,
+    AuthenticatedSettingsAppearanceLazyRoute:
+      AuthenticatedSettingsAppearanceLazyRoute,
+    AuthenticatedSettingsDisplayLazyRoute:
+      AuthenticatedSettingsDisplayLazyRoute,
+    AuthenticatedSettingsNotificationsLazyRoute:
+      AuthenticatedSettingsNotificationsLazyRoute,
+    AuthenticatedSettingsIndexLazyRoute: AuthenticatedSettingsIndexLazyRoute,
+  }
 
 const AuthenticatedSettingsRouteLazyRouteWithChildren =
   AuthenticatedSettingsRouteLazyRoute._addFileChildren(
@@ -518,7 +504,6 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500LazyRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
-  '/answering': typeof djAnsweringRoute
   '/settings': typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/sign-in-2': typeof authSignIn2LazyRoute
@@ -544,7 +529,6 @@ export interface FileRoutesByTo {
   '/500': typeof errors500LazyRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
-  '/answering': typeof djAnsweringRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/sign-in-2': typeof authSignIn2LazyRoute
   '/sign-up': typeof authSignUpLazyRoute
@@ -571,7 +555,6 @@ export interface FileRoutesById {
   '/(auth)/500': typeof auth500Route
   '/(auth)/otp': typeof authOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
-  '/(dj)/answering': typeof djAnsweringRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
   '/(auth)/sign-in-2': typeof authSignIn2LazyRoute
@@ -597,81 +580,78 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-  | ''
-  | '/500'
-  | '/otp'
-  | '/sign-in'
-  | '/answering'
-  | '/settings'
-  | '/forgot-password'
-  | '/sign-in-2'
-  | '/sign-up'
-  | '/401'
-  | '/403'
-  | '/404'
-  | '/503'
-  | '/'
-  | '/settings/account'
-  | '/settings/appearance'
-  | '/settings/display'
-  | '/settings/notifications'
-  | '/apps'
-  | '/chats'
-  | '/help-center'
-  | '/settings/'
-  | '/tasks'
-  | '/users'
+    | ''
+    | '/500'
+    | '/otp'
+    | '/sign-in'
+    | '/settings'
+    | '/forgot-password'
+    | '/sign-in-2'
+    | '/sign-up'
+    | '/401'
+    | '/403'
+    | '/404'
+    | '/503'
+    | '/'
+    | '/settings/account'
+    | '/settings/appearance'
+    | '/settings/display'
+    | '/settings/notifications'
+    | '/apps'
+    | '/chats'
+    | '/help-center'
+    | '/settings/'
+    | '/tasks'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
-  | '/500'
-  | '/otp'
-  | '/sign-in'
-  | '/answering'
-  | '/forgot-password'
-  | '/sign-in-2'
-  | '/sign-up'
-  | '/401'
-  | '/403'
-  | '/404'
-  | '/503'
-  | '/'
-  | '/settings/account'
-  | '/settings/appearance'
-  | '/settings/display'
-  | '/settings/notifications'
-  | '/apps'
-  | '/chats'
-  | '/help-center'
-  | '/settings'
-  | '/tasks'
-  | '/users'
+    | '/500'
+    | '/otp'
+    | '/sign-in'
+    | '/forgot-password'
+    | '/sign-in-2'
+    | '/sign-up'
+    | '/401'
+    | '/403'
+    | '/404'
+    | '/503'
+    | '/'
+    | '/settings/account'
+    | '/settings/appearance'
+    | '/settings/display'
+    | '/settings/notifications'
+    | '/apps'
+    | '/chats'
+    | '/help-center'
+    | '/settings'
+    | '/tasks'
+    | '/users'
   id:
-  | '__root__'
-  | '/_authenticated'
-  | '/(auth)/500'
-  | '/(auth)/otp'
-  | '/(auth)/sign-in'
-  | '/(dj)/answering'
-  | '/_authenticated/settings'
-  | '/(auth)/forgot-password'
-  | '/(auth)/sign-in-2'
-  | '/(auth)/sign-up'
-  | '/(errors)/401'
-  | '/(errors)/403'
-  | '/(errors)/404'
-  | '/(errors)/500'
-  | '/(errors)/503'
-  | '/_authenticated/'
-  | '/_authenticated/settings/account'
-  | '/_authenticated/settings/appearance'
-  | '/_authenticated/settings/display'
-  | '/_authenticated/settings/notifications'
-  | '/_authenticated/apps/'
-  | '/_authenticated/chats/'
-  | '/_authenticated/help-center/'
-  | '/_authenticated/settings/'
-  | '/_authenticated/tasks/'
-  | '/_authenticated/users/'
+    | '__root__'
+    | '/_authenticated'
+    | '/(auth)/500'
+    | '/(auth)/otp'
+    | '/(auth)/sign-in'
+    | '/_authenticated/settings'
+    | '/(auth)/forgot-password'
+    | '/(auth)/sign-in-2'
+    | '/(auth)/sign-up'
+    | '/(errors)/401'
+    | '/(errors)/403'
+    | '/(errors)/404'
+    | '/(errors)/500'
+    | '/(errors)/503'
+    | '/_authenticated/'
+    | '/_authenticated/settings/account'
+    | '/_authenticated/settings/appearance'
+    | '/_authenticated/settings/display'
+    | '/_authenticated/settings/notifications'
+    | '/_authenticated/apps/'
+    | '/_authenticated/chats/'
+    | '/_authenticated/help-center/'
+    | '/_authenticated/settings/'
+    | '/_authenticated/tasks/'
+    | '/_authenticated/users/'
   fileRoutesById: FileRoutesById
 }
 
@@ -680,7 +660,6 @@ export interface RootRouteChildren {
   auth500Route: typeof auth500Route
   authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
-  djAnsweringRoute: typeof djAnsweringRoute
   authForgotPasswordLazyRoute: typeof authForgotPasswordLazyRoute
   authSignIn2LazyRoute: typeof authSignIn2LazyRoute
   authSignUpLazyRoute: typeof authSignUpLazyRoute
@@ -696,7 +675,6 @@ const rootRouteChildren: RootRouteChildren = {
   auth500Route: auth500Route,
   authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,
-  djAnsweringRoute: djAnsweringRoute,
   authForgotPasswordLazyRoute: authForgotPasswordLazyRoute,
   authSignIn2LazyRoute: authSignIn2LazyRoute,
   authSignUpLazyRoute: authSignUpLazyRoute,
@@ -721,7 +699,6 @@ export const routeTree = rootRoute
         "/(auth)/500",
         "/(auth)/otp",
         "/(auth)/sign-in",
-        "/(dj)/answering",
         "/(auth)/forgot-password",
         "/(auth)/sign-in-2",
         "/(auth)/sign-up",
@@ -752,9 +729,6 @@ export const routeTree = rootRoute
     },
     "/(auth)/sign-in": {
       "filePath": "(auth)/sign-in.tsx"
-    },
-    "/(dj)/answering": {
-      "filePath": "(dj)/answering.tsx"
     },
     "/_authenticated/settings": {
       "filePath": "_authenticated/settings/route.lazy.tsx",
