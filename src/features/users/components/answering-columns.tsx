@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { time } from 'console'
 import { cn } from '@/lib/utils'
@@ -5,8 +6,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import LongText from '@/components/long-text'
+import { useUsers } from '../context/users-context'
 import { callTypes, userTypes } from '../data/data'
 import { Answering, User } from '../data/schema'
+import { AnsweringActionDialog } from './answering-action-dialog'
 import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 
@@ -85,10 +88,21 @@ export const columns: ColumnDef<Answering>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Actions' />
     ),
-    cell: ({ row }) => (
-      <div className='w-fit text-nowrap'>
-        <Button>View</Button>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const [open, setOpen] = useState(false)
+
+      return (
+        <div className='w-fit text-nowrap'>
+          <Button onClick={() => setOpen(true)}>View</Button>
+          <AnsweringActionDialog
+            //@ts-ignore
+            data={row.original}
+            key='question-view'
+            open={open}
+            onOpenChange={setOpen}
+          />
+        </div>
+      )
+    },
   },
 ]
