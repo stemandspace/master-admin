@@ -137,6 +137,17 @@ export const sidebarData: SidebarData = {
             },
           ],
         },
+        {
+          title: 'Discovery Jar',
+          icon: IconBug,
+          items: [
+            {
+              title: 'Answering',
+              url: '/answering' as any, // this need to be changed
+              icon: IconLock,
+            },
+          ],
+        },
       ],
     },
     {
