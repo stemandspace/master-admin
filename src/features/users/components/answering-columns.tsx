@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import CheckMark from '@/components/check-mark'
 import LongText from '@/components/long-text'
 import { useUsers } from '../context/users-context'
 import { callTypes, userTypes } from '../data/data'
@@ -33,14 +34,7 @@ export const columns: ColumnDef<Answering>[] = [
         'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'
       ),
     },
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label='Select row'
-        className='translate-y-[2px]'
-      />
-    ),
+    cell: ({ row }) => <CheckMark id={parseInt(row.original.id)} />,
     enableSorting: false,
     enableHiding: false,
   },
