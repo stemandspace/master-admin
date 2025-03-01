@@ -157,7 +157,7 @@ const AuthenticatedSettingsRouteLazyRoute =
 const djAnsweringRoute = djAnsweringImport.update({
   id: '/(dj)/answering',
   path: '/answering',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 const authSignInRoute = authSignInImport.update({
@@ -472,17 +472,17 @@ interface AuthenticatedSettingsRouteLazyRouteChildren {
 }
 
 const AuthenticatedSettingsRouteLazyRouteChildren: AuthenticatedSettingsRouteLazyRouteChildren =
-  {
-    AuthenticatedSettingsAccountLazyRoute:
-      AuthenticatedSettingsAccountLazyRoute,
-    AuthenticatedSettingsAppearanceLazyRoute:
-      AuthenticatedSettingsAppearanceLazyRoute,
-    AuthenticatedSettingsDisplayLazyRoute:
-      AuthenticatedSettingsDisplayLazyRoute,
-    AuthenticatedSettingsNotificationsLazyRoute:
-      AuthenticatedSettingsNotificationsLazyRoute,
-    AuthenticatedSettingsIndexLazyRoute: AuthenticatedSettingsIndexLazyRoute,
-  }
+{
+  AuthenticatedSettingsAccountLazyRoute:
+    AuthenticatedSettingsAccountLazyRoute,
+  AuthenticatedSettingsAppearanceLazyRoute:
+    AuthenticatedSettingsAppearanceLazyRoute,
+  AuthenticatedSettingsDisplayLazyRoute:
+    AuthenticatedSettingsDisplayLazyRoute,
+  AuthenticatedSettingsNotificationsLazyRoute:
+    AuthenticatedSettingsNotificationsLazyRoute,
+  AuthenticatedSettingsIndexLazyRoute: AuthenticatedSettingsIndexLazyRoute,
+}
 
 const AuthenticatedSettingsRouteLazyRouteWithChildren =
   AuthenticatedSettingsRouteLazyRoute._addFileChildren(
@@ -597,81 +597,81 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | ''
-    | '/500'
-    | '/otp'
-    | '/sign-in'
-    | '/answering'
-    | '/settings'
-    | '/forgot-password'
-    | '/sign-in-2'
-    | '/sign-up'
-    | '/401'
-    | '/403'
-    | '/404'
-    | '/503'
-    | '/'
-    | '/settings/account'
-    | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
-    | '/apps'
-    | '/chats'
-    | '/help-center'
-    | '/settings/'
-    | '/tasks'
-    | '/users'
+  | ''
+  | '/500'
+  | '/otp'
+  | '/sign-in'
+  | '/answering'
+  | '/settings'
+  | '/forgot-password'
+  | '/sign-in-2'
+  | '/sign-up'
+  | '/401'
+  | '/403'
+  | '/404'
+  | '/503'
+  | '/'
+  | '/settings/account'
+  | '/settings/appearance'
+  | '/settings/display'
+  | '/settings/notifications'
+  | '/apps'
+  | '/chats'
+  | '/help-center'
+  | '/settings/'
+  | '/tasks'
+  | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/500'
-    | '/otp'
-    | '/sign-in'
-    | '/answering'
-    | '/forgot-password'
-    | '/sign-in-2'
-    | '/sign-up'
-    | '/401'
-    | '/403'
-    | '/404'
-    | '/503'
-    | '/'
-    | '/settings/account'
-    | '/settings/appearance'
-    | '/settings/display'
-    | '/settings/notifications'
-    | '/apps'
-    | '/chats'
-    | '/help-center'
-    | '/settings'
-    | '/tasks'
-    | '/users'
+  | '/500'
+  | '/otp'
+  | '/sign-in'
+  | '/answering'
+  | '/forgot-password'
+  | '/sign-in-2'
+  | '/sign-up'
+  | '/401'
+  | '/403'
+  | '/404'
+  | '/503'
+  | '/'
+  | '/settings/account'
+  | '/settings/appearance'
+  | '/settings/display'
+  | '/settings/notifications'
+  | '/apps'
+  | '/chats'
+  | '/help-center'
+  | '/settings'
+  | '/tasks'
+  | '/users'
   id:
-    | '__root__'
-    | '/_authenticated'
-    | '/(auth)/500'
-    | '/(auth)/otp'
-    | '/(auth)/sign-in'
-    | '/(dj)/answering'
-    | '/_authenticated/settings'
-    | '/(auth)/forgot-password'
-    | '/(auth)/sign-in-2'
-    | '/(auth)/sign-up'
-    | '/(errors)/401'
-    | '/(errors)/403'
-    | '/(errors)/404'
-    | '/(errors)/500'
-    | '/(errors)/503'
-    | '/_authenticated/'
-    | '/_authenticated/settings/account'
-    | '/_authenticated/settings/appearance'
-    | '/_authenticated/settings/display'
-    | '/_authenticated/settings/notifications'
-    | '/_authenticated/apps/'
-    | '/_authenticated/chats/'
-    | '/_authenticated/help-center/'
-    | '/_authenticated/settings/'
-    | '/_authenticated/tasks/'
-    | '/_authenticated/users/'
+  | '__root__'
+  | '/_authenticated'
+  | '/(auth)/500'
+  | '/(auth)/otp'
+  | '/(auth)/sign-in'
+  | '/(dj)/answering'
+  | '/_authenticated/settings'
+  | '/(auth)/forgot-password'
+  | '/(auth)/sign-in-2'
+  | '/(auth)/sign-up'
+  | '/(errors)/401'
+  | '/(errors)/403'
+  | '/(errors)/404'
+  | '/(errors)/500'
+  | '/(errors)/503'
+  | '/_authenticated/'
+  | '/_authenticated/settings/account'
+  | '/_authenticated/settings/appearance'
+  | '/_authenticated/settings/display'
+  | '/_authenticated/settings/notifications'
+  | '/_authenticated/apps/'
+  | '/_authenticated/chats/'
+  | '/_authenticated/help-center/'
+  | '/_authenticated/settings/'
+  | '/_authenticated/tasks/'
+  | '/_authenticated/users/'
   fileRoutesById: FileRoutesById
 }
 
