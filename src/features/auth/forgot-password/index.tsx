@@ -1,9 +1,19 @@
+import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { getDjAnswers } from '@/utils/fetcher-functions'
 import { Card } from '@/components/ui/card'
 import AuthLayout from '../auth-layout'
 import { ForgotForm } from './components/forgot-password-form'
 
 export default function ForgotPassword() {
+  // const {} = useQuery({
+  //   queryKey: ['forgot-password'],
+  //   queryFn: async () => {
+  //     // Your forgot password logic here
+  //     await getDjAnswers()
+  //   },
+  // })
+
   return (
     <AuthLayout>
       <Card className='p-6'>
