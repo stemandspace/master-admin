@@ -1,6 +1,8 @@
 
 
+import { string } from "zod";
 import strapi from "./strapi";
+import { an } from "node_modules/@faker-js/faker/dist/airline-BXaRegOM";
 
 const getDjQuestions = async () => {
     try {
@@ -23,4 +25,19 @@ const getDjAnswers = async () => {
 }
 
 
-export { getDjQuestions, getDjAnswers };
+const ConnectDjQuestionsWithAnswer = async (
+    qIds: string[], // questions ids gues here...
+    aIds: string, // answer id goes here...
+) => {
+    try {
+        await strapi.put(`/discovery-jar-questions/${aIds}`, {
+            answer: {
+                connect: qIds
+            }
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export { getDjQuestions, getDjAnswers, ConnectDjQuestionsWithAnswer };
