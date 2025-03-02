@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { getDjQuestions } from '@/utils/fetcher-functions'
-import useMark from '@/hooks/use-mark'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -27,14 +26,11 @@ export default function Users() {
     queryFn: async () => await getDjQuestions(),
   })
 
-  const { storage } = useMark()
 
   if (isLoading) return <div>Loading...</div>
 
   return (
     <div>
-      {JSON.stringify({ storage })}
-
       <Header fixed>
         <Search />
         <div className='ml-auto flex items-center space-x-4'>

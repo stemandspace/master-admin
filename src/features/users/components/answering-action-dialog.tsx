@@ -23,7 +23,6 @@ interface Props {
 }
 
 export function AnsweringActionDialog({ data, open, onOpenChange }: Props) {
-  console.log(data?.user)
   return (
     <Dialog open={open} onOpenChange={onOpenChange} >
       <DialogContent className='max-w-[95%] md:max-w-xl'>
