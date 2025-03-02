@@ -34,7 +34,7 @@ export const columns: ColumnDef<Answering>[] = [
         'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'
       ),
     },
-    cell: ({ row }) => <CheckMark id={parseInt(row.original.id)} />,
+    cell: ({ row }) => <CheckMark id={parseInt(row.original.id)} row={row}/>,
     enableSorting: false,
     enableHiding: false,
   },

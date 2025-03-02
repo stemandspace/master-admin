@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { getDjAnswers } from '@/utils/fetcher-functions'
 import strapi from '@/utils/strapi'
 import useMark from '@/hooks/use-mark'
+import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -29,9 +30,7 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
     queryKey: ['answers'],
     queryFn: async () => await getDjAnswers(),
   })
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
+
   const { storage } = useMark()
   console.log(answers)
 
@@ -50,6 +49,9 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
         )
       )
       console.log('All questions updated successfully!')
+      toast({
+        title: 'All questions connected successfully!',
+      })
       unmarkAll()
     } catch (error) {
       console.error('Error updating questions:', error)
@@ -71,7 +73,7 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
           </div>
         ) : (
           <ScrollArea className='max-h-[22rem] space-y-4'>
-            <div className='flex flex-col gap-2'>
+            <div className='flex items-center gap-2'>
               <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
                 Total Questions:
               </h3>

@@ -3,9 +3,10 @@ import { Checkbox } from './ui/checkbox'
 
 interface CheckMarkProps {
   id: number
+  row:any
 }
 
-const CheckMark: React.FC<CheckMarkProps> = ({ id }) => {
+const CheckMark: React.FC<CheckMarkProps> = ({ id ,row}) => {
   const { isMarked, mark } = useMark()
   return (
     <div>
@@ -15,7 +16,9 @@ const CheckMark: React.FC<CheckMarkProps> = ({ id }) => {
 
       <Checkbox
         checked={isMarked(id)}
-        onCheckedChange={() => mark(id)}
+        onCheckedChange={(value) => {
+          row.toggleSelected(!!value)
+          mark(id)}}
         aria-label='Mark'
       />
     </div>
