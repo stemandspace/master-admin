@@ -22,7 +22,7 @@ export default function Users() {
     // isError,
     // error
   } = useQuery({
-    queryKey: ['answers'],
+    queryKey: ['questions'],
     queryFn: async () => await getDjQuestions(),
   })
 

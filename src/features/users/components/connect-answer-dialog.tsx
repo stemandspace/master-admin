@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
-import { getDjAnswers } from '@/utils/fetcher-functions'
-import strapi from '@/utils/strapi'
+import {
+  ConnectDjQuestionsWithAnswer,
+  getDjAnswers,
+} from '@/utils/fetcher-functions'
 import useMark from '@/hooks/use-mark'
-import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -26,13 +27,13 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
   const [ans, setAns] = useState() as any
 
   const { unmarkAll } = useMark()
+
   const { data: answers, isLoading } = useQuery({
     queryKey: ['answers'],
     queryFn: async () => await getDjAnswers(),
   })
 
   const { storage } = useMark()
-  console.log(answers)
 
   const handleConnect = async () => {
     if (!storage.length || !ans) {
@@ -41,17 +42,17 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
     }
 
     try {
-      await Promise.all(
-        storage.map((id) =>
-          strapi.put(`/discovery-jar-questions/${id}`, {
-            answer: ans,
-          })
-        )
-      )
-      console.log('All questions updated successfully!')
-      toast({
-        title: 'All questions connected successfully!',
-      })
+      const stringArray = storage.map(String)
+      await ConnectDjQuestionsWithAnswer(stringArray, ans)
+
+      // await Promise.all(
+      //   storage.map((id) =>
+      //     strapi.put(`/discovery-jar-questions/${id}`, {
+      //       answer: ans,
+      //     })
+      //   )
+      // )
+
       unmarkAll()
     } catch (error) {
       console.error('Error updating questions:', error)

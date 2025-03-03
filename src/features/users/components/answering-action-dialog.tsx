@@ -1,7 +1,10 @@
 'use client'
 
+import ReactPlayer from 'react-player'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { ExternalLink } from 'lucide-react'
 
 interface Props {
   data: {
@@ -23,38 +26,77 @@ interface Props {
 }
 
 export function AnsweringActionDialog({ data, open, onOpenChange }: Props) {
+  const mediaUrl = data?.media?.url
+
+  // Function to check media type
+  const isVideo = (url: string) => /\.(mp4|webm|ogg|mov|mkv)$/i.test(url)
+  const isPDF = (url: string) => /\.pdf$/i.test(url)
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} >
-      <DialogContent className='max-w-[95%] md:max-w-xl'>
-        <DialogHeader className='text-left'>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[95%] md:max-w-2xl max-h-[90vh]">
+        <DialogHeader className="text-left">
           <DialogTitle>Question Details</DialogTitle>
         </DialogHeader>
-        <ScrollArea className='-mr-4 h-[26.25rem]--- w-full py-1 pr-4'>
-          <div className='space-y-4 p-4'>
+
+        <ScrollArea className="-mr-4 h-[80vh] md:h-[30rem] w-full py-1 pr-4">
+          <div className="space-y-6 p-2 md:p-4 py-0">
             {/* Question */}
-            <div>
-              <h3 className='text-lg font-semibold'>Question:</h3>
-              <p className='text-gray-700 dark:text-gray-300'>{data?.question}</p>
+            <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Question:</h3>
+              <p className="text-gray-700 dark:text-gray-300 mt-2">{data?.question}</p>
             </div>
 
             {/* Media Preview */}
-            {data?.media?.url && (
-              <div>
-                <h3 className='text-lg font-semibold'>Media :</h3>
-                <img
-                  src={data?.media?.url}
-                  alt='Media Preview'
-                  className='w-full max-h-64 object-contain rounded-lg border'
-                />
+            {mediaUrl && (
+              <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 rounded-lg shadow">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Media:</h3>
+                <div className="mt-3">
+                  {isVideo(mediaUrl) ? (
+                    <ReactPlayer
+                      url={mediaUrl}
+                      controls
+                      className="rounded-lg max-h-40 border"
+                    />
+                  ) : isPDF(mediaUrl) ? (
+                    <Button
+                      asChild
+                      className="mt-2 flex items-center gap-2 text-sm"
+                    >
+                      <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
+                        Open PDF <ExternalLink size={16} />
+                      </a>
+                    </Button>
+                  ) : (
+                    <img
+                      src={mediaUrl}
+                      alt="Media Preview"
+                      className="w-full h-40 object-contain rounded-lg border"
+                    />
+                  )}
+                </div>
               </div>
             )}
 
             {/* User Details */}
-            <div>
-              <h3 className='text-lg font-semibold'>User Details:</h3>
-              <p><strong>Name:</strong> {data?.user?.firstName && data?.user?.lastName ? `${data?.user?.firstName} ${data?.user?.lastName}` : data?.user?.username}</p>
-              <p><strong>Email:</strong> {data?.user?.email}</p>
-              <p><strong>Phone:</strong> {data?.user?.mobile}</p>
+            <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">User Details:</h3>
+              <div className="mt-3 space-y-2">
+                <p>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">Name:</span>{' '}
+                  {data?.user?.firstName && data?.user?.lastName
+                    ? `${data?.user?.firstName} ${data?.user?.lastName}`
+                    : data?.user?.username}
+                </p>
+                <p>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">Email:</span>{' '}
+                  {data?.user?.email}
+                </p>
+                <p>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">Phone:</span>{' '}
+                  {data?.user?.mobile}
+                </p>
+              </div>
             </div>
           </div>
         </ScrollArea>
