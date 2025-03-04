@@ -1,7 +1,10 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
+import { useSearch } from '@tanstack/react-router'
 import { ExternalLink } from 'lucide-react'
 import ReactPlayer from 'react-player'
+import { getConfigRewards } from '@/utils/fetcher-functions'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -31,11 +34,23 @@ interface Props {
 }
 
 export function AnsweringActionDialog({ data, open, onOpenChange }: Props) {
+  const search: {
+    theme?: string
+  } = useSearch({ from: '/_authenticated/users/' })
+
+  const id = search?.theme || ''
+
   const mediaUrl = data?.media?.url
 
   // Function to check media type
   const isVideo = (url: string) => /\.(mp4|webm|ogg|mov|mkv)$/i.test(url)
   const isPDF = (url: string) => /\.pdf$/i.test(url)
+
+  const { data: rewards } = useQuery({
+    queryKey: ['disconvery-jar-config-rewards', id],
+    queryFn: async () => await getConfigRewards({ id }),
+    enabled: !!id,
+  })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -45,7 +60,7 @@ export function AnsweringActionDialog({ data, open, onOpenChange }: Props) {
         </DialogHeader>
 
         <ScrollArea className='-mr-4 h-[80vh] w-full py-1 pr-4 md:h-[30rem]'>
-          <div className='space-y-6 p-2 py-0 md:p-4'>
+          <div className='space-y-6 py-0 md:p-4'>
             {/* Question */}
             <div className='rounded-lg bg-gray-100 p-2 shadow dark:bg-gray-800 md:p-4'>
               <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
@@ -90,6 +105,44 @@ export function AnsweringActionDialog({ data, open, onOpenChange }: Props) {
                     />
                   )}
                 </div>
+              </div>
+            )}
+            {rewards.request_rewards.length > 0 && (
+              <div className='mt-4 grid gap-4 rounded-lg bg-gray-100 p-2 shadow dark:bg-gray-800 md:p-4'>
+                <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
+                  Rewards:
+                </h3>
+                {rewards.request_rewards.map((reward: any) => (
+                  <div
+                    key={reward.id}
+                    className='grid md:grid-cols-2  gap-2 rounded-lg border border-gray-300 p-4 shadow-sm dark:border-gray-700'
+                  >
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      <span className='font-semibold text-gray-700 dark:text-gray-300'>
+                        ID:
+                      </span>{' '}
+                      {reward.id}
+                    </p>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      <span className='font-semibold text-gray-700 dark:text-gray-300'>
+                        Type:
+                      </span>{' '}
+                      {reward.type}
+                    </p>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      <span className='font-semibold text-gray-700 dark:text-gray-300'>
+                        Title:
+                      </span>{' '}
+                      {reward.title}
+                    </p>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>
+                      <span className='font-semibold text-gray-700 dark:text-gray-300'>
+                        Value:
+                      </span>{' '}
+                      {reward.value}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
 
