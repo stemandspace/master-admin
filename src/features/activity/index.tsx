@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { getDjQuestions } from '@/utils/fetcher-functions'
+import { getActivityRequest } from '@/utils/fetcher-functions'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { columns } from './components/answering-columns'
-import { UsersPrimaryButtons } from './components/answering-primary-buttons'
-import { UsersTable } from './components/answering-table'
+import { columns } from './components/activity-columns'
+import { ActivityTable } from './components/activity-table'
 
 // import { UsersDialogs } from './components/users-dialogs'
 
@@ -15,18 +14,13 @@ import { UsersTable } from './components/answering-table'
 // import { userListSchema } from './data/schema'
 // import { users } from './data/users'
 
-export default function Users() {
-  const {
-    data: questions,
-    isLoading,
-    // isError,
-    // error
-  } = useQuery({
-    queryKey: ['questions'],
-    queryFn: async () => await getDjQuestions(),
+export default function Activity() {
+  const { data: challenges, isLoading } = useQuery({
+    queryKey: ['activity'],
+    queryFn: async () => await getActivityRequest(),
+    
   })
-
-
+  console.log(challenges)
   if (isLoading) return <div>Loading...</div>
 
   return (
@@ -42,16 +36,18 @@ export default function Users() {
       <Main>
         <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>Questions</h2>
+            <h2 className='text-2xl font-bold tracking-tight'>Activity</h2>
             <p className='text-muted-foreground'>
-              These are the questions asked via Discovery Jar
+              Activity requested by the user
             </p>
           </div>
-          <UsersPrimaryButtons />
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
           {/* {JSON.stringify(questions)} */}
-          <UsersTable data={questions||[]} columns={columns} />
+          <ActivityTable
+            data={challenges || []}
+            columns={columns}
+          />
         </div>
       </Main>
     </div>

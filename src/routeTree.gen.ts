@@ -49,8 +49,14 @@ const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
 const AuthenticatedChatsIndexLazyImport = createFileRoute(
   '/_authenticated/chats/',
 )()
+const AuthenticatedChallengesIndexLazyImport = createFileRoute(
+  '/_authenticated/challenges/',
+)()
 const AuthenticatedAppsIndexLazyImport = createFileRoute(
   '/_authenticated/apps/',
+)()
+const AuthenticatedActivityRequestIndexLazyImport = createFileRoute(
+  '/_authenticated/activity-request/',
 )()
 const AuthenticatedSettingsNotificationsLazyImport = createFileRoute(
   '/_authenticated/settings/notifications',
@@ -218,6 +224,17 @@ const AuthenticatedChatsIndexLazyRoute =
     import('./routes/_authenticated/chats/index.lazy').then((d) => d.Route),
   )
 
+const AuthenticatedChallengesIndexLazyRoute =
+  AuthenticatedChallengesIndexLazyImport.update({
+    id: '/challenges/',
+    path: '/challenges/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/challenges/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
   {
     id: '/apps/',
@@ -227,6 +244,17 @@ const AuthenticatedAppsIndexLazyRoute = AuthenticatedAppsIndexLazyImport.update(
 ).lazy(() =>
   import('./routes/_authenticated/apps/index.lazy').then((d) => d.Route),
 )
+
+const AuthenticatedActivityRequestIndexLazyRoute =
+  AuthenticatedActivityRequestIndexLazyImport.update({
+    id: '/activity-request/',
+    path: '/activity-request/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/activity-request/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 
 const AuthenticatedSettingsNotificationsLazyRoute =
   AuthenticatedSettingsNotificationsLazyImport.update({
@@ -402,11 +430,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsNotificationsLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
+    '/_authenticated/activity-request/': {
+      id: '/_authenticated/activity-request/'
+      path: '/activity-request'
+      fullPath: '/activity-request'
+      preLoaderRoute: typeof AuthenticatedActivityRequestIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/apps/': {
       id: '/_authenticated/apps/'
       path: '/apps'
       fullPath: '/apps'
       preLoaderRoute: typeof AuthenticatedAppsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/challenges/': {
+      id: '/_authenticated/challenges/'
+      path: '/challenges'
+      fullPath: '/challenges'
+      preLoaderRoute: typeof AuthenticatedChallengesIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/chats/': {
@@ -478,7 +520,9 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedActivityRequestIndexLazyRoute: typeof AuthenticatedActivityRequestIndexLazyRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
+  AuthenticatedChallengesIndexLazyRoute: typeof AuthenticatedChallengesIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
@@ -489,7 +533,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedActivityRequestIndexLazyRoute:
+    AuthenticatedActivityRequestIndexLazyRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
+  AuthenticatedChallengesIndexLazyRoute: AuthenticatedChallengesIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
@@ -517,7 +564,9 @@ export interface FileRoutesByFullPath {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/activity-request': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
+  '/challenges': typeof AuthenticatedChallengesIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
@@ -541,7 +590,9 @@ export interface FileRoutesByTo {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/activity-request': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
+  '/challenges': typeof AuthenticatedChallengesIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
@@ -569,7 +620,9 @@ export interface FileRoutesById {
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/_authenticated/activity-request/': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
+  '/_authenticated/challenges/': typeof AuthenticatedChallengesIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
@@ -597,7 +650,9 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/activity-request'
     | '/apps'
+    | '/challenges'
     | '/chats'
     | '/help-center'
     | '/settings/'
@@ -620,7 +675,9 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/activity-request'
     | '/apps'
+    | '/challenges'
     | '/chats'
     | '/help-center'
     | '/settings'
@@ -646,7 +703,9 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/activity-request/'
     | '/_authenticated/apps/'
+    | '/_authenticated/challenges/'
     | '/_authenticated/chats/'
     | '/_authenticated/help-center/'
     | '/_authenticated/settings/'
@@ -714,7 +773,9 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
+        "/_authenticated/activity-request/",
         "/_authenticated/apps/",
+        "/_authenticated/challenges/",
         "/_authenticated/chats/",
         "/_authenticated/help-center/",
         "/_authenticated/tasks/",
@@ -785,8 +846,16 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/settings/notifications.lazy.tsx",
       "parent": "/_authenticated/settings"
     },
+    "/_authenticated/activity-request/": {
+      "filePath": "_authenticated/activity-request/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/apps/": {
       "filePath": "_authenticated/apps/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/challenges/": {
+      "filePath": "_authenticated/challenges/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/chats/": {
