@@ -11,15 +11,12 @@ const getThemes = async () => {
   }
 }
 
-const getDjQuestions = async ({id}:{id:string}) => {
+const getDjQuestions = async ({ id }: { id: string }) => {
   try {
     const response = await strapi.get(
-      `/discovery-jar-questions?filters[answer]&filters[theme][$eq]=${id}&populate=*`
-    )
-    console.log(response)
-    
-    // '/discovery-jar-questions?filters[answer][$null]=true&filters[user][$notNull]=true&populate=*'
-    // query validation = answer should be null & user should not be null
+      `/discovery-jar-questions?filters[$and][0][theme][id][$eq]=${id}&filters[$and][1][answer][id][$null]=true`
+    );
+    clg(response)
     return response.data.data
   } catch (error) {
     console.log(error)
@@ -29,7 +26,7 @@ const getDjQuestions = async ({id}:{id:string}) => {
 const getDjAnswers = async () => {
   try {
     const response = await strapi.get('/discovery-jar-answers')
-    
+
     // '/discovery-jar-answers?filters[createdAt][$notNull]=true'
     // fetch list of answers published;
 
