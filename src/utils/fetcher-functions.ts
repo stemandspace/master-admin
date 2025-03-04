@@ -43,6 +43,7 @@ const getConfigRewards = async ({ id }: { id: string }) => {
     console.log(error)
   }
 }
+
 const ConnectDjQuestionsWithAnswer = async (
   qIds: string[], // questions ids goes here...
   aIds: string // answer id goes here...
