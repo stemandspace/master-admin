@@ -107,7 +107,7 @@ export function AnsweringActionDialog({ data, open, onOpenChange }: Props) {
                 </div>
               </div>
             )}
-            {rewards.request_rewards.length > 0 && (
+            {rewards?.request_rewards?.length > 0 && (
               <div className='mt-4 grid gap-4 rounded-lg bg-gray-100 p-2 shadow dark:bg-gray-800 md:p-4'>
                 <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
                   Rewards:
