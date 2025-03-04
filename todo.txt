@@ -3,9 +3,27 @@
 // reward > filters > challenge > id 
 
 
-
-
 // get winner rewards
 
 // reward > filters > challange_winner_reward > id
 
+
+// listing 
+
+// reward - id, type, value 
+
+
+
+// check rewardIds 
+
+
+/reward-api/ user, rewardIds=[]
+
+
+// create notification-x {
+    sdfsdf
+    sdfsds
+    sdfsdfsdfs
+    sdfsdfsdf,
+    sdfsf
+} 
