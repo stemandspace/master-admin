@@ -35,13 +35,13 @@ const getDjAnswers = async () => {
     console.log(error)
   }
 }
-const getConfigRewards = async ({id}:{id:string})=>{
+const getConfigRewards = async ({ id }: { id: string }) => {
   try {
-    const response = await strapi.get(`/disconvery-jar-configs/${id}?populate=request_rewards`)
+    const response = await strapi.get(`/rewards?filters[discovery_jar_config][id][$eq]=${id}&populate=*`)
     return response.data.data
-    } catch (error) {
-      console.log(error)
-    }
+  } catch (error) {
+    console.log(error)
+  }
 }
 const ConnectDjQuestionsWithAnswer = async (
   qIds: string[], // questions ids goes here...

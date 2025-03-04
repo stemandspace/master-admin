@@ -107,15 +107,15 @@ export function AnsweringActionDialog({ data, open, onOpenChange }: Props) {
                 </div>
               </div>
             )}
-            {rewards?.request_rewards?.length > 0 && (
+            {rewards?.length > 0 && (
               <div className='mt-4 grid gap-4 rounded-lg bg-gray-100 p-2 shadow dark:bg-gray-800 md:p-4'>
                 <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
                   Rewards:
                 </h3>
-                {rewards.request_rewards.map((reward: any) => (
+                {rewards.map((reward: any) => (
                   <div
                     key={reward.id}
-                    className='grid md:grid-cols-2  gap-2 rounded-lg border border-gray-300 p-4 shadow-sm dark:border-gray-700'
+                    className='grid gap-2 rounded-lg border border-gray-300 p-4 shadow-sm dark:border-gray-700 md:grid-cols-2'
                   >
                     <p className='text-sm text-gray-500 dark:text-gray-400'>
                       <span className='font-semibold text-gray-700 dark:text-gray-300'>
