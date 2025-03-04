@@ -55,7 +55,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
     const id = data?.id
     await challengeRequestUpdate({ id, status, winner })
     onOpenChange(false)
-    // try {
+    // try {  
     //   const res = await strapi.put(`/challenge-requests/${data.id}`, {
     //     status: status,
     //     winner: winner,

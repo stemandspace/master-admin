@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useSearch } from '@tanstack/react-router'
 import { getActivityRequest } from '@/utils/fetcher-functions'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -8,17 +9,17 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { columns } from './components/activity-columns'
 import { ActivityTable } from './components/activity-table'
 
-// import { UsersDialogs } from './components/users-dialogs'
-
-// import UsersProvider from './context/users-context'
-// import { userListSchema } from './data/schema'
-// import { users } from './data/users'
-
 export default function Activity() {
+  const search: {
+    course?: string
+  } = useSearch({ from: '/_authenticated/activity-request/' })
+  console.log(search?.course)
+
+  const id = search.course || ''
+  
   const { data: challenges, isLoading } = useQuery({
-    queryKey: ['activity'],
-    queryFn: async () => await getActivityRequest(),
-    
+    queryKey: ['activity', search.course],
+    queryFn: async () => await getActivityRequest({ id }),
   })
   console.log(challenges)
   if (isLoading) return <div>Loading...</div>
@@ -44,10 +45,7 @@ export default function Activity() {
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
           {/* {JSON.stringify(questions)} */}
-          <ActivityTable
-            data={challenges || []}
-            columns={columns}
-          />
+          <ActivityTable data={challenges || []} columns={columns} />
         </div>
       </Main>
     </div>

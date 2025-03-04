@@ -2,11 +2,21 @@ import { clg } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import strapi from './strapi'
 
-const getDjQuestions = async () => {
+const getThemes = async () => {
+  try {
+    const response = await strapi.get('/disconvery-jar-configs?populate=*')
+    return response.data.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const getDjQuestions = async ({id}:{id:string}) => {
   try {
     const response = await strapi.get(
-      '/discovery-jar-questions?filters[answer]&populate=*'
+      `/discovery-jar-questions?filters[answer]&filters[theme][$eq]=${id}&populate=*`
     )
+    console.log(response)
     
     // '/discovery-jar-questions?filters[answer][$null]=true&filters[user][$notNull]=true&populate=*'
     // query validation = answer should be null & user should not be null
@@ -87,9 +97,20 @@ const challengeRequestUpdate = async ({
   }
 }
 
-const getActivityRequest = async () => {
+
+const getCourses = async () => {
   try {
-    const response = await strapi.get(`/activity-requests?populate=*`)
+    const response = await strapi.get('/courses?populate=*')
+    return response.data.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+const getActivityRequest = async ({ id }: { id: string }) => {
+  try {
+    const response = await strapi.get(`/activity-requests?filters[courseId][$eq]=${id}&populate=*`)
     return response.data.data
   } catch (error) {
     console.log(error)
@@ -117,12 +138,14 @@ const activityUpdate = async ({
 }
 
 export {
+  getThemes,
   getDjQuestions,
   getDjAnswers,
   ConnectDjQuestionsWithAnswer,
   getChallenges,
   getChallengeRequest,
   challengeRequestUpdate,
+  getCourses,
   getActivityRequest,
   activityUpdate,
 }

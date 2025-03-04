@@ -7,7 +7,7 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { columns } from './components/challenge-columns'
 import { UsersTable } from './components/challenge-table'
-import { useState } from 'react'
+import { useSearch } from '@tanstack/react-router'
 
 // import { UsersDialogs } from './components/users-dialogs'
 
@@ -16,9 +16,14 @@ import { useState } from 'react'
 // import { users } from './data/users'
 
 export default function Challenge() {
-  const [challenge, setChallenge] = useState({ id: '', title: '' })
-  const id = challenge.id
-  console.log(challenge, "id",id)
+
+
+  const search: {
+    challenge?: string
+  } = useSearch({ from: '/_authenticated/challenges/' })
+
+
+  const id = search?.challenge||""
   const {
     data: challenges,
     isLoading,
@@ -28,16 +33,6 @@ export default function Challenge() {
     enabled: !!id, 
   })
 
-  const handleChallengeSelect = ({
-    id,
-    title,
-  }: {
-    id: string
-    title: string
-  }) => {
-    setChallenge({ id, title })
-    console.log(id, title)
-  }
 
   console.log(challenges)
   if (isLoading) return <div>Loading...</div>
@@ -64,8 +59,7 @@ export default function Challenge() {
           <UsersTable
             data={challenges||[]}
             columns={columns}
-            handleChallengeSelect={handleChallengeSelect}
-          />
+           />
         </div>
       </Main>
     </div>

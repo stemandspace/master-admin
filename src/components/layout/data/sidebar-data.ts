@@ -73,7 +73,7 @@ export const sidebarData: SidebarData = {
           icon: IconMessages,
         },
         {
-          title: 'Users',
+          title: 'Questions',
           url: '/users',
           icon: IconUsers,
         },

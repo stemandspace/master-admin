@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { useQuery } from '@tanstack/react-query'
 import { Table } from '@tanstack/react-table'
@@ -14,31 +14,43 @@ import {
 import { userTypes } from '../data/data'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
+import { useRouter, useSearch } from '@tanstack/react-router'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
-  handleChallengeSelect: (arg0: { id: string; title: string }) => void
 }
 
 export function DataTableToolbar<TData>({
   table,
-  handleChallengeSelect
 }: DataTableToolbarProps<TData>) {
+
+
+    const search: {
+      challenge?: string
+    } = useSearch({ from: '/_authenticated/challenges/' })
+  
+    const router = useRouter()
+    const [selectedChallenge, setSelectedChallenge] = useState<{
+      id: string
+      title: string
+    }>({ id: search?.challenge || '', title: '' })
+  
+
   const { data: challenges } = useQuery({
     queryKey: ['challenges'],
     queryFn: async () => await getChallenges(),
   })
 
-  // Set default challenge to the first item if available
-  const [challenge, setChallenge] = useState({ id: '', title: '' })
 
-  useEffect(() => {
-    if (challenges?.length > 0) {
-      const defaultChallenge = { id: challenges[0].id, title: challenges[0].title }
-      setChallenge(defaultChallenge)
-      handleChallengeSelect(defaultChallenge) // Ensure Users component updates
-    }
-  }, [challenges])
+  const handleChallengeChange = (newCourse: any) => {
+    setSelectedChallenge({ id: newCourse?.id, title: newCourse?.title })
+
+    router.navigate({
+      to: '.',
+      search: (prev) => ({ ...prev, challenge: newCourse.id || undefined }),
+      replace: true,
+    })
+  }
   
 
   return (
@@ -50,11 +62,11 @@ export function DataTableToolbar<TData>({
               (challenge:any) => challenge.id === value
             )
             if (selectedChallenge) {
-              handleChallengeSelect(selectedChallenge)
-              setChallenge(selectedChallenge)
+              handleChallengeChange(selectedChallenge)
+              setSelectedChallenge(selectedChallenge)
             }
           }}
-          value={challenge?.id}
+          value={selectedChallenge?.id}
         >
           <SelectTrigger className='w-full'>
             <SelectValue placeholder='Select challenge' />

@@ -36,10 +36,9 @@ declare module '@tanstack/react-table' {
 interface DataTableProps {
   columns: ColumnDef<Answering>[]
   data: Answering[]
-  handleChallengeSelect: (arg0: { id: string; title: string }) => void
 }
 
-export function UsersTable({ columns, data, handleChallengeSelect }: DataTableProps) {
+export function UsersTable({ columns, data }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -69,7 +68,7 @@ export function UsersTable({ columns, data, handleChallengeSelect }: DataTablePr
 
   return (
     <div className='space-y-4'>
-      <DataTableToolbar table={table}  handleChallengeSelect={handleChallengeSelect} />
+      <DataTableToolbar table={table} />
       <div className='rounded-md border'>
         <Table>
           <TableHeader>

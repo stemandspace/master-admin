@@ -1,10 +1,21 @@
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { userTypes } from '../data/data'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useRouter, useSearch } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import {  getThemes } from '@/utils/fetcher-functions'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -15,19 +26,65 @@ export function DataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
+
+
+ 
+  const search: {
+    theme?: string
+  } = useSearch({ from: '/_authenticated/users/' })
+
+  const router = useRouter()
+  const [selectedChallenge, setSelectedChallenge] = useState<{
+    id: string
+    title: string
+  }>({ id: search?.theme || '', title: '' })
+
+
+const { data: themes } = useQuery({
+  queryKey: ['disconvery-jar-config'],
+  queryFn: async () => await getThemes(),
+})
+
+
+const handleChallengeChange = (newCourse: any) => {
+  setSelectedChallenge({ id: newCourse?.id, title: newCourse?.title })
+
+  router.navigate({
+    to: '.',
+    search: (prev) => ({ ...prev, theme: newCourse.id || undefined }),
+    replace: true,
+  })
+}
+
+
+
+
   return (
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
-        <Input
-          placeholder='Filter users...'
-          value={
-            (table.getColumn('username')?.getFilterValue() as string) ?? ''
-          }
-          onChange={(event) =>
-            table.getColumn('username')?.setFilterValue(event.target.value)
-          }
-          className='h-8 w-[150px] lg:w-[250px]'
-        />
+      <Select
+          onValueChange={(value) => {
+            const selectedChallenge = themes.find(
+              (challenge:any) => challenge.id === value
+            )
+            if (selectedChallenge) {
+              handleChallengeChange(selectedChallenge)
+              setSelectedChallenge(selectedChallenge)
+            }
+          }}
+          value={selectedChallenge?.id}
+        >
+          <SelectTrigger className='w-full'>
+            <SelectValue placeholder='Select challenge' />
+          </SelectTrigger>
+          <SelectContent>
+            {themes?.map((option: { id: string; theme_name: string }) => (
+              <SelectItem key={option.id} value={option.id}>
+                {option.theme_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className='flex gap-x-2'>
           {table.getColumn('status') && (
             <DataTableFacetedFilter
