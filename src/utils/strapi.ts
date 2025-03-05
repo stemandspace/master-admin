@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const BASEURL = `http://localhost:1337/api`
+const BASEURL = `https://api.cosmickids.club/api`
 const strapi = axios.create({
     baseURL: BASEURL,
     headers: {
