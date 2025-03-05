@@ -32,9 +32,6 @@ export default function Challenge() {
     queryFn: async () => await getChallengeRequest({ id }),
     enabled: !!id, 
   })
-
-
-  console.log(challenges)
   if (isLoading) return <div>Loading...</div>
 
   return (

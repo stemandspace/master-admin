@@ -1,9 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { ExternalLink } from 'lucide-react'
-import ReactPlayer from 'react-player'
-import { challengeRequestUpdate } from '@/utils/fetcher-functions'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -20,7 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
+import { challengeRequestUpdate } from '@/utils/fetcher-functions'
+import { ExternalLink } from 'lucide-react'
+import { useState } from 'react'
+import ReactPlayer from 'react-player'
 
 interface Props {
   data: {
@@ -31,11 +29,12 @@ interface Props {
       url: string
     }
     user: {
-      firstName?: string
-      lastName?: string
+      firstname?: string
+      lastname?: string
       username?: string
       email: string
-      mobile: string
+      mobile: string;
+      id: string
     }
   }
   open: boolean
@@ -44,7 +43,8 @@ interface Props {
 
 export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
   const [status, setStatus] = useState<string>(data?.status || 'pending')
-  const [winner, setWinner] = useState<boolean>(data?.winner || false)
+ /// const [winner, setWinner] = useState<boolean>(data?.winner || false)
+  const [isLoading, setIsLoading] = useState(false)
   const mediaUrl = data?.media?.url
 
   // Function to check media type
@@ -52,9 +52,16 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
   const isPDF = (url: string) => /\.pdf$/i.test(url)
 
   const handleSave = async () => {
-    const id = data?.id
-    await challengeRequestUpdate({ id, status, winner })
-    onOpenChange(false)
+    try {
+      setIsLoading(true)
+      const id = data?.id
+      await challengeRequestUpdate({ id, status, winner:false, userId: data.user.id, email: data.user.email, name: `${data.user.firstname} ${data.user.lastname}` })
+      onOpenChange(false)
+    } catch (error) {
+      console.log("Challenge Update Error", error)
+    } finally {
+      setIsLoading(false)
+    }
     // try {  
     //   const res = await strapi.put(`/challenge-requests/${data.id}`, {
     //     status: status,
@@ -128,6 +135,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
                       { label: 'Pending', value: 'pending' },
                       { label: 'Approved', value: 'approved' },
                       { label: 'Rejected', value: 'rejected' },
+                      { label: 'Winner', value: 'winner' },
                     ].map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -136,7 +144,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className='my-4 flex items-center justify-between'>
+           {/*    <div className='my-4 flex items-center justify-between'>
                 <Label htmlFor='winner' className='text-sm font-semibold'>
                   Winner:
                 </Label>
@@ -145,9 +153,9 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
                   checked={winner}
                   onCheckedChange={setWinner}
                 />
-              </div>
-              <div className='flex justify-end'>
-                <Button onClick={handleSave}>Save</Button>
+              </div> */}
+              <div className='flex justify-end mt-3'>
+                <Button onClick={handleSave} disabled={isLoading} >{isLoading ? "Save..." : "Save"}</Button>
               </div>
             </div>
 
@@ -161,8 +169,8 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
                   <span className='font-medium text-gray-800 dark:text-gray-200'>
                     Name:
                   </span>{' '}
-                  {data?.user?.firstName && data?.user?.lastName
-                    ? `${data?.user?.firstName} ${data?.user?.lastName}`
+                  {data?.user?.firstname && data?.user?.lastname
+                    ? `${data?.user?.firstname} ${data?.user?.lastname}`
                     : data?.user?.username}
                 </p>
                 <p>
