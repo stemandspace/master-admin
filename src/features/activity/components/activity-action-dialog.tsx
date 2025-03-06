@@ -19,7 +19,7 @@ import { activityUpdate } from '@/utils/fetcher-functions'
 import { ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import ReactPlayer from 'react-player'
-
+import { useQueryClient } from '@tanstack/react-query';
 interface Props {
   data: {
     id: string
@@ -45,6 +45,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
   const [status, setStatus] = useState<string>(data?.status || 'pending')
   const [isLoading, setIsLoading] = useState(false)
   const mediaUrl = data?.media?.url
+  const queryClient = useQueryClient();
 
   // Function to check media type
   const isVideo = (url: string) => /\.(mp4|webm|ogg|mov|mkv)$/i.test(url)
@@ -55,6 +56,8 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
       setIsLoading(true)
       const id = data?.id
       await activityUpdate({ id, status,  userId: data.user.id, email: data.user.email, name: `${data.user.firstname} ${data.user.lastname}` })
+      //@ts-ignore
+      queryClient.invalidateQueries(['activity', id]);
       onOpenChange(false)
     } catch (error) {
       console.log(error)
