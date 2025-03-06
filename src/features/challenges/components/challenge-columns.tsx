@@ -46,7 +46,7 @@ export const columns: ColumnDef<Answering>[] = [
     cell: ({ row }) => (
       <div className='w-fit text-nowrap lowercase'>
         {/* @ts-ignore */}
-        {row.original?.user.email || 'N/A'}
+        {row.original?.user?.email || 'N/A'}
       </div>
     ),
   },

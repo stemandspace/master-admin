@@ -65,9 +65,9 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
         id,
         status,
         winner: false,
-        userId: data.user.id,
-        email: data.user.email,
-        name: `${data.user.firstname} ${data.user.lastname}`,
+        userId: data?.user?.id,
+        email: data?.user?.email,
+        name: `${data?.user?.firstname} ${data?.user?.lastname}`,
       })
       //@ts-ignore
       queryClient.invalidateQueries(['challenge-activities', challengeId]);

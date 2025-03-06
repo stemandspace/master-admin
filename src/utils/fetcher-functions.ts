@@ -111,8 +111,6 @@ const getChallenges = async () => {
 }
 
 const getChallengeRequest = async ({ id }: { id: string }) => {
-  console.log(id)
-
   try {
     const response = await strapi.get(
       `/challenge-requests?filters[challengeId][$eq]=${id}&populate=*`
