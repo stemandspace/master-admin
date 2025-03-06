@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 // import { useUsers } from '../context/users-context'
 // import { callTypes, userTypes } from '../data/data'
 import { Answering } from '../data/schema'
-import {  ChallengeActionDialog } from './activity-action-dialog'
+import { ChallengeActionDialog } from './activity-action-dialog'
 import { DataTableColumnHeader } from './data-table-column-header'
 
 // import { DataTableRowActions } from './data-table-row-actions'
@@ -23,6 +23,20 @@ export const columns: ColumnDef<Answering>[] = [
       ),
     },
     cell: ({ row }) => <p>{row?.original?.id}</p>,
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    id: 'email',
+    header: () => <p>Email</p>,
+    meta: {
+      className: cn(
+        'sticky md:table-cell left-0 z-10 rounded-tl',
+        'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted'
+      ),
+    },
+    //@ts-ignore
+    cell: ({ row }) => <p>{row?.original?.user.email}</p>,
     enableSorting: false,
     enableHiding: false,
   },
