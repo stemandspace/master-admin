@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useSearch } from '@tanstack/react-router'
 
 interface Props {
   data: {
@@ -40,15 +41,21 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
+import { useQueryClient } from '@tanstack/react-query';
 
 export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
   const mediaUrl = data?.media?.url
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState<string>(data?.status || 'pending')
-
+  const queryClient = useQueryClient();
   // Function to check media type
   const isVideo = (url: string) => /\.(mp4|webm|ogg|mov|mkv)$/i.test(url)
   const isPDF = (url: string) => /\.pdf$/i.test(url)
+  const search: {
+    challenge?: string
+  } = useSearch({ from: '/_authenticated/challenges/' })
+
+  const id = search?.challenge || ''
 
   const handleSave = async () => {
     try {
@@ -62,6 +69,8 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
         email: data.user.email,
         name: `${data.user.firstname} ${data.user.lastname}`,
       })
+      //@ts-ignore
+      queryClient.invalidateQueries(['challenge-activities', id]);
       onOpenChange(false)
       window.location.reload()
     } catch (error) {
