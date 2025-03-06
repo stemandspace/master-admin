@@ -1,7 +1,7 @@
+import { APPROVED_TEMPLATE_ID, WINNER_TEMPLATE_ID } from '@/lib/templateIds'
 import { clg } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import strapi from './strapi'
-import { APPROVED_TEMPLATE_ID, WINNER_TEMPLATE_ID } from '@/lib/templateIds'
 
 const getThemes = async () => {
   try {
@@ -15,7 +15,7 @@ const getThemes = async () => {
 const getDjQuestions = async ({ id }: { id: string }) => {
   try {
     const response = await strapi.get(
-      `/discovery-jar-questions?filters[$and][0][theme][id][$eq]=${id}&filters[$and][1][answer][id][$null]=true&populate=*`
+      `/discovery-jar-questions?filters[$and][0][theme][id][$eq]=${id}&filters[$and][1][answer][id][$null]=true`
     )
     clg(response)
     return response.data.data
@@ -47,14 +47,52 @@ const getConfigRewards = async ({ id }: { id: string }) => {
   }
 }
 
-const ConnectDjQuestionsWithAnswer = async (
-  qIds: string[], // questions ids goes here...
-  aIds: string // answer id goes here...
-) => {
+const ConnectDjQuestionsWithAnswer = async ({
+  qIds,
+  aId,
+  rewardIds,
+}: {
+  qIds: string[]
+  aId: string
+  rewardIds: []
+}) => {
   try {
-    await strapi.put(`/discovery-jar-answers/${aIds}`, {
+    await strapi.put(`/discovery-jar-answers/${aId}`, {
       discovery_jar_questions: qIds,
     })
+    const usersRes = Promise.all(
+      qIds.map(async (id) => {
+        const q = await strapi.get(`/discovery-jar-questions/${id}/?populate=*`)
+        return {
+          userId: q.data?.data?.user?.id,
+          name: `${q.data?.data?.user?.firstname} ${q.data?.data?.user?.lastname}`,
+          email: q.data?.data?.user?.email,
+        }
+      })
+    )
+    const users = await usersRes
+    await Promise.all(
+      users.map(async (user) => {
+        await strapi.post(`/v1/reward`, {
+          userId: user.userId,
+          rewardIds,
+        })
+        await strapi.post('/notificationxes', {
+          mail_template: WINNER_TEMPLATE_ID,
+          channel: 'mail',
+          user: Number(user.userId),
+          variables: {
+            variables: {
+              challenge_link: 'challenge_link_value',
+              challenge_name: 'exp',
+              name: name,
+            },
+            name: user.name,
+            email: user.email,
+          },
+        })
+      })
+    )
     clg('All questions updated successfully!')
     toast({
       title: 'All questions connected successfully!',
@@ -119,7 +157,7 @@ const challengeRequestUpdate = async ({
         (obj, index, self) => index === self.findIndex((o) => o.id === obj.id)
       )
       const rewardIds = uniqueArr.map((r) => r.id)
-      const rewardRes = await strapi.post(`/v1/reward`, {
+      await strapi.post(`/v1/reward`, {
         userId,
         rewardIds,
       })
@@ -137,7 +175,6 @@ const challengeRequestUpdate = async ({
           email,
         },
       })
-      console.log(rewardRes, 'rewards')
     }
     if (status === 'approved') {
       const rewardIds = getRewards.rewards.map((r: any) => r.id)
@@ -230,7 +267,7 @@ const activityUpdate = async ({
     }
     const rewardIds = getRewards.rewards.map((r: any) => r.id)
     const challengeName = getRewards.title
- 
+
     if (status === 'approved') {
       await strapi.post(`/v1/reward`, {
         userId,

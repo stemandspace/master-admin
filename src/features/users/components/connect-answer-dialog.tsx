@@ -35,8 +35,8 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
 
 
   const [ans, setAns] = useState() as any
-
-  const { unmarkAll ,storage} = useMark()
+  const [isConnecting, setIsConnecting] = useState(false)
+  const { unmarkAll, storage } = useMark()
 
   const { data: answers, isLoading } = useQuery({
     queryKey: ['answers'],
@@ -58,14 +58,16 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
     }
 
     try {
+      setIsConnecting(true)
       const stringArray = storage.map(String)
-      await ConnectDjQuestionsWithAnswer(stringArray, ans)
-
+      const rewardIds = rewards.map((r: any) => r.id) || []
+      await ConnectDjQuestionsWithAnswer({ qIds: stringArray, aId: ans, rewardIds: rewardIds })
       unmarkAll()
     } catch (error) {
-      console.error('Error updating questions:', error)
+      console.log('Error updating questions:', error)
     } finally {
       onOpenChange(false)
+      setIsConnecting(false)
     }
   }
   return (
@@ -147,10 +149,10 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
           </ScrollArea>
         )}
         <DialogFooter className='flex justify-end gap-2'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button variant='outline' disabled={isConnecting} onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={() => handleConnect()}>Connect</Button>
+          <Button onClick={() => handleConnect()} disabled={isConnecting}>{isConnecting ? "Connect..." : "Connect"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
