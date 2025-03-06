@@ -43,7 +43,6 @@ interface Props {
 
 export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
   const [status, setStatus] = useState<string>(data?.status || 'pending')
- // const [winner, setWinner] = useState<boolean>(data?.winner || false)
   const [isLoading, setIsLoading] = useState(false)
   const mediaUrl = data?.media?.url
 
@@ -55,7 +54,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
     try {
       setIsLoading(true)
       const id = data?.id
-      await activityUpdate({ id, status, winner:false, userId: data.user.id, email: data.user.email, name: `${data.user.firstname} ${data.user.lastname}` })
+      await activityUpdate({ id, status,  userId: data.user.id, email: data.user.email, name: `${data.user.firstname} ${data.user.lastname}` })
       onOpenChange(false)
     } catch (error) {
       console.log(error)
@@ -136,7 +135,6 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
                       { label: 'Pending', value: 'pending' },
                       { label: 'Approved', value: 'approved' },
                       { label: 'Rejected', value: 'rejected' },
-                      { label: 'Winner', value: 'winner' },
                     ].map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}

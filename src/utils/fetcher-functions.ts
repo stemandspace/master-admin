@@ -212,7 +212,6 @@ const activityUpdate = async ({
 }: {
   id: string
   status: string
-  winner?: boolean
   userId: string
   email: string
   name: string
@@ -231,27 +230,7 @@ const activityUpdate = async ({
     }
     const rewardIds = getRewards.rewards.map((r: any) => r.id)
     const challengeName = getRewards.title
-
-    if (status === 'winner') {
-      await strapi.post(`/v1/reward`, {
-        userId,
-        rewardIds,
-      })
-      await strapi.post('/notificationxes', {
-        mail_template: WINNER_TEMPLATE_ID,
-        channel: 'mail',
-        user: Number(userId),
-        variables: {
-          variables: {
-            challenge_link: 'challenge_link_value',
-            challenge_name: challengeName,
-            name: name,
-          },
-          name,
-          email,
-        },
-      })
-    }
+ 
     if (status === 'approved') {
       await strapi.post(`/v1/reward`, {
         userId,
