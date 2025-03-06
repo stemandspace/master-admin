@@ -38,10 +38,7 @@ interface DataTableProps {
   data: Answering[]
 }
 
-export function ActivityTable({
-  columns,
-  data,
-}: DataTableProps) {
+export function ActivityTable({ columns, data }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -72,6 +69,15 @@ export function ActivityTable({
   return (
     <div className='space-y-4'>
       <DataTableToolbar table={table} />
+      <div>
+        <div className='flex items-center justify-between'>
+          <div>
+            <span className='text-muted-foreground'>
+              Showing {table.getRowModel().rows.length} of {data.length} results
+            </span>
+          </div>
+        </div>
+      </div>
       <div className='rounded-md border'>
         <Table>
           <TableHeader>

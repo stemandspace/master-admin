@@ -15,24 +15,22 @@ import { UsersTable } from './components/answering-table'
 // import UsersProvider from './context/users-context'
 // import { userListSchema } from './data/schema'
 // import { users } from './data/users'
- 
+
 export default function Users() {
   const search: {
     theme?: string
   } = useSearch({ from: '/_authenticated/users/' })
 
-  const id = search?.theme || ""
+  const id = search?.theme || ''
 
   const {
     data: questions,
     isLoading,
     // isError,
     // error,
- 
   } = useQuery({
     queryKey: ['discovery_jar_quetions', id],
     queryFn: async () => await getDjQuestions({ id }),
-    
   })
 
   if (isLoading) return <div>Loading...</div>
@@ -58,7 +56,6 @@ export default function Users() {
           <UsersPrimaryButtons />
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-          {/* {JSON.stringify(questions)} */}
           <UsersTable data={questions || []} columns={columns} />
         </div>
       </Main>

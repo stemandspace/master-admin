@@ -69,6 +69,15 @@ export function UsersTable({ columns, data }: DataTableProps) {
   return (
     <div className='space-y-4'>
       <DataTableToolbar table={table} />
+      <div>
+        <div className='flex items-center justify-between'>
+          <div>
+            <span className='text-muted-foreground'>
+              Showing {table.getRowModel().rows.length} of {data.length} results
+            </span>
+          </div>
+        </div>
+      </div>
       <div className='rounded-md border'>
         <Table>
           <TableHeader>
