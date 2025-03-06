@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { useQuery } from '@tanstack/react-query'
+import { useRouter, useSearch } from '@tanstack/react-router'
 import { Table } from '@tanstack/react-table'
 import { getChallenges } from '@/utils/fetcher-functions'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,6 @@ import {
 import { userTypes } from '../data/data'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
-import { useRouter, useSearch } from '@tanstack/react-router'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -23,24 +23,22 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
+  const router = useRouter()
 
+  const search: {
+    challenge?: string
+  } = useSearch({ from: '/_authenticated/challenges/' })
 
-    const search: {
-      challenge?: string
-    } = useSearch({ from: '/_authenticated/challenges/' })
-  
-    const router = useRouter()
-    const [selectedChallenge, setSelectedChallenge] = useState<{
-      id: string
-      title: string
-    }>({ id: search?.challenge || '', title: '' })
-  
+  const [selectedChallenge, setSelectedChallenge] = useState<{
+    id: string
+    title: string
+  }>({ id: search?.challenge || '', title: '' })
 
-  const { data: challenges } = useQuery({
+  // Fetch challenges
+  const { data: challenges, isLoading } = useQuery({
     queryKey: ['challenges'],
     queryFn: async () => await getChallenges(),
   })
-
 
   const handleChallengeChange = (newCourse: any) => {
     setSelectedChallenge({ id: newCourse?.id, title: newCourse?.title })
@@ -51,7 +49,6 @@ export function DataTableToolbar<TData>({
       replace: true,
     })
   }
-  
 
   return (
     <div className='flex items-center justify-between'>
@@ -59,7 +56,7 @@ export function DataTableToolbar<TData>({
         <Select
           onValueChange={(value) => {
             const selectedChallenge = challenges.find(
-              (challenge:any) => challenge.id === value
+              (challenge: any) => challenge.id === value
             )
             if (selectedChallenge) {
               handleChallengeChange(selectedChallenge)
@@ -68,8 +65,14 @@ export function DataTableToolbar<TData>({
           }}
           value={selectedChallenge?.id}
         >
-          <SelectTrigger className='w-full'>
-            <SelectValue placeholder='Select challenge' />
+          <SelectTrigger className='w-full' disabled={isLoading}>
+            <SelectValue
+              placeholder={
+                isLoading
+                  ? 'Fetching Challenges...'
+                  : selectedChallenge?.title || 'Select Challenge'
+              }
+            />
           </SelectTrigger>
           <SelectContent>
             {challenges?.map((option: { id: string; title: string }) => (
