@@ -1,9 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { ExternalLink } from 'lucide-react'
-import ReactPlayer from 'react-player'
-import { activityUpdate } from '@/utils/fetcher-functions'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -20,7 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
+import { activityUpdate } from '@/utils/fetcher-functions'
+import { ExternalLink } from 'lucide-react'
+import { useState } from 'react'
+import ReactPlayer from 'react-player'
 
 interface Props {
   data: {

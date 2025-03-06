@@ -206,7 +206,6 @@ const getActivityRequest = async ({ id }: { id: string }) => {
 const activityUpdate = async ({
   id,
   status,
-  winner,
   userId,
   name,
   email,
