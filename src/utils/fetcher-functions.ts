@@ -15,7 +15,7 @@ const getThemes = async () => {
 const getDjQuestions = async ({ id }: { id: string }) => {
   try {
     const response = await strapi.get(
-      `/discovery-jar-questions?filters[$and][0][theme][id][$eq]=${id}&filters[$and][1][answer][id][$null]=true`
+      `/discovery-jar-questions?filters[$and][0][theme][id][$eq]=${id}&filters[$and][1][answer][id][$null]=true&populate=*`
     )
     clg(response)
     return response.data.data
