@@ -1,6 +1,7 @@
 import { clg } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import strapi from './strapi'
+import { APPROVED_TEMPLATE_ID, WINNER_TEMPLATE_ID } from '@/lib/templateIds'
 
 const getThemes = async () => {
   try {
@@ -123,7 +124,7 @@ const challengeRequestUpdate = async ({
         rewardIds,
       })
       await strapi.post('/notificationxes', {
-        mail_template: 2,
+        mail_template: WINNER_TEMPLATE_ID,
         channel: 'mail',
         user: Number(userId),
         variables: {
@@ -145,7 +146,7 @@ const challengeRequestUpdate = async ({
         rewardIds,
       })
       await strapi.post('/notificationxes', {
-        mail_template: 3,
+        mail_template: APPROVED_TEMPLATE_ID,
         channel: 'mail',
         user: Number(userId),
         variables: {
@@ -173,7 +174,6 @@ const getChallengeRewards = async ({
 }) => {
   try {
     const response = await strapi.get(`/challenges/${challengeId}?populate=*`)
-    console.log(response.data.rewards, 'challenges')
     const winner_reward = response.data.data.winner_reward || []
     const rewards = response.data.data.rewards || []
     const title = response.data.data.title
@@ -207,19 +207,89 @@ const activityUpdate = async ({
   id,
   status,
   winner,
+  userId,
+  name,
+  email,
 }: {
   id: string
   status: string
-  winner: boolean
+  winner?: boolean
+  userId: string
+  email: string
+  name: string
 }) => {
   try {
     const res = await strapi.put(`/activity-requests/${id}`, {
-      status: status,
-      winner: winner,
+      status: status === 'winner' ? 'approved' : status,
+      winner: status === 'winner' ? true : false,
     })
-    clg(res)
+
+    const getRewards = (await getActivityRewards({
+      courseId: res.data.data.courseId,
+    })) || {
+      rewards: [],
+      title: '',
+    }
+    const rewardIds = getRewards.rewards.map((r: any) => r.id)
+    const challengeName = getRewards.title
+
+    if (status === 'winner') {
+      await strapi.post(`/v1/reward`, {
+        userId,
+        rewardIds,
+      })
+      await strapi.post('/notificationxes', {
+        mail_template: WINNER_TEMPLATE_ID,
+        channel: 'mail',
+        user: Number(userId),
+        variables: {
+          variables: {
+            challenge_link: 'challenge_link_value',
+            challenge_name: challengeName,
+            name: name,
+          },
+          name,
+          email,
+        },
+      })
+    }
+    if (status === 'approved') {
+      await strapi.post(`/v1/reward`, {
+        userId,
+        rewardIds,
+      })
+      await strapi.post('/notificationxes', {
+        mail_template: APPROVED_TEMPLATE_ID,
+        channel: 'mail',
+        user: Number(userId),
+        variables: {
+          variables: {
+            challenge_link: 'challenge_link_value',
+            challenge_name: challengeName,
+            name,
+            product_name: 'product_name_value',
+          },
+          name,
+          email,
+        },
+      })
+    }
   } catch (error) {
     console.error(error)
+  }
+}
+
+const getActivityRewards = async ({ courseId }: { courseId: string }) => {
+  try {
+    const response = await strapi.get(
+      `/courses/${courseId}?populate[activity_modules][populate][rewards]=*`
+    )
+
+    const rewards = response.data.data.activity_modules.rewards || []
+    const title = response.data.data.activity_modules.name || ''
+    return { rewards, title }
+  } catch (error) {
+    console.log('Activity Reward  fetch Error', error)
   }
 }
 
@@ -236,4 +306,5 @@ export {
   getActivityRequest,
   activityUpdate,
   getChallengeRewards,
+  getActivityRewards,
 }
