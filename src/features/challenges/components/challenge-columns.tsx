@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 // import { useUsers } from '../context/users-context'
 // import { callTypes, userTypes } from '../data/data'
 import { Answering } from '../data/schema'
-import {  ChallengeActionDialog } from './challenge-action-dialog'
+import { ChallengeActionDialog } from './challenge-action-dialog'
 import { DataTableColumnHeader } from './data-table-column-header'
 
 // import { DataTableRowActions } from './data-table-row-actions'
@@ -26,14 +26,37 @@ export const columns: ColumnDef<Answering>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-
+  {
+    accessorKey: 'media',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Media' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-fit text-nowrap uppercase'>
+        {/* @ts-ignore */}
+        {row?.original?.media ? 'A' : 'N/A'}
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'user',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='User' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-fit text-nowrap lowercase'>
+        {/* @ts-ignore */}
+        {row.original?.user.email || 'N/A'}
+      </div>
+    ),
+  },
   {
     accessorKey: 'status',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
+      <DataTableColumnHeader column={column} title='  Status' />
     ),
     cell: ({ row }) => (
-      <div className='w-fit text-nowrap capitalize'>
+      <div className='w-fit text-nowrap uppercase'>
         {/* @ts-ignore */}
         {row.original?.status || 'N/A'}
       </div>
@@ -46,8 +69,8 @@ export const columns: ColumnDef<Answering>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className='w-fit text-nowrap capitalize'>
-          {row.original?.winner ? 'Yes' : 'No'}
+        <div className='w-fit text-nowrap uppercase'>
+          {row.original?.winner ? 'TRUE' : 'FALSE'}
         </div>
       )
     },

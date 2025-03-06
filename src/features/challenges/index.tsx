@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useSearch } from '@tanstack/react-router'
 import { getChallengeRequest } from '@/utils/fetcher-functions'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -7,31 +8,19 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { columns } from './components/challenge-columns'
 import { UsersTable } from './components/challenge-table'
-import { useSearch } from '@tanstack/react-router'
-
-// import { UsersDialogs } from './components/users-dialogs'
-
-// import UsersProvider from './context/users-context'
-// import { userListSchema } from './data/schema'
-// import { users } from './data/users'
 
 export default function Challenge() {
-
-
   const search: {
     challenge?: string
   } = useSearch({ from: '/_authenticated/challenges/' })
 
-
-  const id = search?.challenge||""
-  const {
-    data: challenges,
-    isLoading,
-  } = useQuery({
-    queryKey: ['challenge-activities',id],
+  const id = search?.challenge || ''
+  const { data: challenges, isLoading } = useQuery({
+    queryKey: ['challenge-activities', id],
     queryFn: async () => await getChallengeRequest({ id }),
-    enabled: !!id, 
+    enabled: !!id,
   })
+
   if (isLoading) return <div>Loading...</div>
 
   return (
@@ -53,10 +42,7 @@ export default function Challenge() {
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
           {/* {JSON.stringify(questions)} */}
-          <UsersTable
-            data={challenges||[]}
-            columns={columns}
-           />
+          <UsersTable data={challenges || []} columns={columns} />
         </div>
       </Main>
     </div>
