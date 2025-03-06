@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useSearch } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Props {
   open: boolean
@@ -26,7 +27,7 @@ interface Props {
 }
 
 export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
-
+  const queryClient = useQueryClient();
   const search: {
     theme?: string
   } = useSearch({ from: '/_authenticated/users/' })
@@ -62,6 +63,8 @@ export function ConnectAnswerDialog({ open, onOpenChange }: Props) {
       const stringArray = storage.map(String)
       const rewardIds = rewards.map((r: any) => r.id) || []
       await ConnectDjQuestionsWithAnswer({ qIds: stringArray, aId: ans, rewardIds: rewardIds })
+      //@ts-ignore
+      queryClient.invalidateQueries(['discovery_jar_quetions', id]);
       unmarkAll()
     } catch (error) {
       console.log('Error updating questions:', error)
