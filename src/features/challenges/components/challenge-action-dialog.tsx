@@ -55,7 +55,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
     challenge?: string
   } = useSearch({ from: '/_authenticated/challenges/' })
 
-  const id = search?.challenge || ''
+  const challengeId = search?.challenge || ''
 
   const handleSave = async () => {
     try {
@@ -70,7 +70,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
         name: `${data.user.firstname} ${data.user.lastname}`,
       })
       //@ts-ignore
-      queryClient.invalidateQueries(['challenge-activities', id]);
+      queryClient.invalidateQueries(['challenge-activities', challengeId]);
       onOpenChange(false)
       window.location.reload()
     } catch (error) {
