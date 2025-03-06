@@ -63,6 +63,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
         name: `${data.user.firstname} ${data.user.lastname}`,
       })
       onOpenChange(false)
+      window.location.reload()
     } catch (error) {
       console.log('Challenge Update Error', error)
     } finally {
