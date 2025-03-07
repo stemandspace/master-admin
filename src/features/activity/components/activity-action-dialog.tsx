@@ -15,16 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { activityUpdate } from '@/utils/fetcher-functions'
+import { activityUpdate, getActivityRewards } from '@/utils/fetcher-functions'
 import { ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import ReactPlayer from 'react-player'
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 interface Props {
   data: {
     id: string
     status: string
     winner: boolean
+    courseId: string
     media?: {
       url: string
     }
@@ -46,16 +47,26 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const mediaUrl = data?.media?.url
   const queryClient = useQueryClient();
-
+  const courseId = data.courseId
   // Function to check media type
   const isVideo = (url: string) => /\.(mp4|webm|ogg|mov|mkv)$/i.test(url)
   const isPDF = (url: string) => /\.pdf$/i.test(url)
 
+  const { data: rewards } = useQuery({
+    queryKey: ['challenge-rewards', courseId],
+    queryFn: async () => await getActivityRewards({ courseId }),
+    enabled: !!courseId,
+  })
   const handleSave = async () => {
     try {
       setIsLoading(true)
       const id = data?.id
-      await activityUpdate({ id, status,  userId: data.user.id, email: data.user.email, name: `${data.user.firstname} ${data.user.lastname}` })
+      await activityUpdate({
+        id, status, userId: data.user.id, email: data.user.email, name: `${data.user.firstname} ${data.user.lastname}`, activityRewards: rewards || {
+          rewards: [],
+          title: '',
+        }
+      })
       //@ts-ignore
       queryClient.invalidateQueries(['activity', id]);
       onOpenChange(false)
@@ -146,7 +157,7 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
                   </SelectContent>
                 </Select>
               </div>
-         {/*      <div className='my-4 flex items-center justify-between'>
+              {/*      <div className='my-4 flex items-center justify-between'>
                 <Label htmlFor='winner' className='text-sm font-semibold'>
                   Winner:
                 </Label>
@@ -190,6 +201,46 @@ export function ChallengeActionDialog({ data, open, onOpenChange }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Rewards */}
+          {rewards?.rewards.length > 0 && (
+            <div className='mt-4 grid gap-4 rounded-lg bg-gray-100 p-2 shadow dark:bg-gray-800 md:p-4'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
+                Rewards:
+              </h3>
+              {rewards?.rewards.map((reward: any) => (
+                <div
+                  key={reward.id}
+                  className='grid gap-2 rounded-lg border border-gray-300 p-4 shadow-sm dark:border-gray-700 md:grid-cols-2'
+                >
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    <span className='font-semibold text-gray-700 dark:text-gray-300'>
+                      ID:
+                    </span>{' '}
+                    {reward.id}
+                  </p>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    <span className='font-semibold text-gray-700 dark:text-gray-300'>
+                      Type:
+                    </span>{' '}
+                    {reward.type}
+                  </p>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    <span className='font-semibold text-gray-700 dark:text-gray-300'>
+                      Title:
+                    </span>{' '}
+                    {reward.title}
+                  </p>
+                  <p className='text-sm text-gray-500 dark:text-gray-400'>
+                    <span className='font-semibold text-gray-700 dark:text-gray-300'>
+                      Value:
+                    </span>{' '}
+                    {reward.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </ScrollArea>
       </DialogContent>
     </Dialog>

@@ -1,11 +1,8 @@
-import {
-  APPROVED_TEMPLATE_ID,
-  REJECT_TEMPLATE_ID,
-  WINNER_TEMPLATE_ID,
-} from '@/lib/templateIds'
-import { clg } from '@/lib/utils'
-import { toast } from '@/hooks/use-toast'
-import strapi from './strapi'
+import { APPROVED_TEMPLATE_ID, REJECT_TEMPLATE_ID, WINNER_TEMPLATE_ID } from '@/lib/templateIds';
+import { clg } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
+import strapi from './strapi';
+
 
 const getThemes = async () => {
   try {
@@ -160,9 +157,10 @@ const challengeRequestUpdate = async ({
         ...challengeRewards.winner_reward,
       ]
       const uniqueArr = allRewards.filter(
-        (obj:any, index, self) => index === self.findIndex((o:any) => o.id === obj.id)
+        (obj: any, index, self) =>
+          index === self.findIndex((o: any) => o.id === obj.id)
       )
-      const rewardIds = uniqueArr.map((r:any) => r.id)
+      const rewardIds = uniqueArr.map((r: any) => r.id)
       await strapi.post(`/v1/reward`, {
         userId,
         rewardIds,
@@ -268,27 +266,26 @@ const activityUpdate = async ({
   userId,
   name,
   email,
+  activityRewards,
 }: {
   id: string
   status: string
   userId: string
   email: string
   name: string
+  activityRewards: {
+    rewards: []
+    title: string
+  }
 }) => {
   try {
-    const res = await strapi.put(`/activity-requests/${id}`, {
+    await strapi.put(`/activity-requests/${id}`, {
       status: status === 'winner' ? 'approved' : status,
       winner: status === 'winner' ? true : false,
     })
-
-    const getRewards = (await getActivityRewards({
-      courseId: res.data.data.courseId,
-    })) || {
-      rewards: [],
-      title: '',
-    }
-    const rewardIds = getRewards.rewards.map((r: any) => r.id)
-    const challengeName = getRewards.title
+   
+    const rewardIds = activityRewards.rewards.map((r: any) => r.id)
+    const challengeName = activityRewards.title
 
     if (status === 'approved') {
       await strapi.post(`/v1/reward`, {

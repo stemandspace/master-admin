@@ -13,7 +13,6 @@ export default function Activity() {
   const search: {
     course?: string
   } = useSearch({ from: '/_authenticated/activity-request/' })
-  console.log(search?.course)
 
   const id = search.course || ''
   
@@ -21,7 +20,6 @@ export default function Activity() {
     queryKey: ['activity', search.course],
     queryFn: async () => await getActivityRequest({ id }),
   })
-  console.log(challenges)
   if (isLoading) return <div>Loading...</div>
 
   return (
