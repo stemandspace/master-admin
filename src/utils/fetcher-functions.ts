@@ -132,6 +132,7 @@ const challengeRequestUpdate = async ({
   userId,
   email,
   name,
+  challengeRewards,
 }: {
   id: string
   status: string
@@ -139,26 +140,29 @@ const challengeRequestUpdate = async ({
   userId: string
   email: string
   name: string
+  challengeRewards: {
+    rewards: []
+    winner_reward: []
+    title: string
+  }
 }) => {
   try {
-    const res = await strapi.put(`/challenge-requests/${id}`, {
+    await strapi.put(`/challenge-requests/${id}`, {
       status: status === 'winner' ? 'approved' : status,
       winner: status === 'winner' ? true : false,
     })
-    const challengeId = res.data.data.challengeId
-    const getRewards = (await getChallengeRewards({ challengeId })) || {
-      rewards: [],
-      winner_reward: [],
-      title: '',
-    }
-    const challengeName = getRewards.title
+
+    const challengeName = challengeRewards.title
 
     if (status === 'winner') {
-      const allRewards = [...getRewards.rewards, ...getRewards.winner_reward]
+      const allRewards = [
+        ...challengeRewards.rewards,
+        ...challengeRewards.winner_reward,
+      ]
       const uniqueArr = allRewards.filter(
-        (obj, index, self) => index === self.findIndex((o) => o.id === obj.id)
+        (obj:any, index, self) => index === self.findIndex((o:any) => o.id === obj.id)
       )
-      const rewardIds = uniqueArr.map((r) => r.id)
+      const rewardIds = uniqueArr.map((r:any) => r.id)
       await strapi.post(`/v1/reward`, {
         userId,
         rewardIds,
@@ -179,7 +183,7 @@ const challengeRequestUpdate = async ({
       })
     }
     if (status === 'approved') {
-      const rewardIds = getRewards.rewards.map((r: any) => r.id)
+      const rewardIds = challengeRewards.rewards.map((r: any) => r.id)
       await strapi.post(`/v1/reward`, {
         userId,
         rewardIds,
