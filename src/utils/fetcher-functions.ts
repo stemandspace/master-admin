@@ -1,4 +1,8 @@
-import { APPROVED_TEMPLATE_ID, WINNER_TEMPLATE_ID } from '@/lib/templateIds'
+import {
+  APPROVED_TEMPLATE_ID,
+  REJECT_TEMPLATE_ID,
+  WINNER_TEMPLATE_ID,
+} from '@/lib/templateIds'
 import { clg } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import strapi from './strapi'
@@ -176,7 +180,7 @@ const challengeRequestUpdate = async ({
     }
     if (status === 'approved') {
       const rewardIds = getRewards.rewards.map((r: any) => r.id)
-      const rewardRes = await strapi.post(`/v1/reward`, {
+      await strapi.post(`/v1/reward`, {
         userId,
         rewardIds,
       })
@@ -195,7 +199,23 @@ const challengeRequestUpdate = async ({
           email,
         },
       })
-      console.log(rewardRes, 'rewards')
+    }
+    if (status === 'rejected') {
+      await strapi.post('/notificationxes', {
+        mail_template: REJECT_TEMPLATE_ID,
+        channel: 'mail',
+        user: Number(userId),
+        variables: {
+          variables: {
+            challenge_link: 'challenge_link_value',
+            challenge_name: challengeName,
+            name,
+            product_name: 'product_name_value',
+          },
+          name,
+          email,
+        },
+      })
     }
   } catch (error) {
     console.error(error)
