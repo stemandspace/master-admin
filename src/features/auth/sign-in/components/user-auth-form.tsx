@@ -1,10 +1,4 @@
-import { HTMLAttributes, useState } from 'react'
-import { z } from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, Navigate } from '@tanstack/react-router'
-import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
-import { cn } from '@/lib/utils'
+import { PasswordInput } from '@/components/password-input'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -15,9 +9,14 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { PasswordInput } from '@/components/password-input'
-import Cookies from 'js-cookie'
 import { toast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Navigate } from '@tanstack/react-router'
+import Cookies from 'js-cookie'
+import { HTMLAttributes, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 
