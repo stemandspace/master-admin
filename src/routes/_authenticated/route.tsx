@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Navigate, Outlet } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
@@ -12,6 +12,10 @@ export const Route = createFileRoute('/_authenticated')({
 
 function RouteComponent() {
   const defaultOpen = Cookies.get('sidebar:state') !== 'false'
+  const authenticated = Cookies.get('ms-a-t')
+  if (!authenticated) {
+    return <Navigate to="/sign-in" />
+  }
   return (
     <SearchProvider>
       <SidebarProvider defaultOpen={defaultOpen}>
