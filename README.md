@@ -10,7 +10,7 @@ I've been creating dashboard UIs at work and for my personal projects. I always 
 
 ## Features
 
-- Light/darkMode
+- Light/dark mode
 - Responsive
 - Accessible
 - With built-in Sidebar component
