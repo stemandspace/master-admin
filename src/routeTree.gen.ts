@@ -46,6 +46,9 @@ const AuthenticatedSettingsIndexLazyImport = createFileRoute(
 const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
   '/_authenticated/help-center/',
 )()
+const AuthenticatedDailyQuizIndexLazyImport = createFileRoute(
+  '/_authenticated/daily-quiz/',
+)()
 const AuthenticatedChatsIndexLazyImport = createFileRoute(
   '/_authenticated/chats/',
 )()
@@ -211,6 +214,17 @@ const AuthenticatedHelpCenterIndexLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/help-center/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedDailyQuizIndexLazyRoute =
+  AuthenticatedDailyQuizIndexLazyImport.update({
+    id: '/daily-quiz/',
+    path: '/daily-quiz/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/daily-quiz/index.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -458,6 +472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatsIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/daily-quiz/': {
+      id: '/_authenticated/daily-quiz/'
+      path: '/daily-quiz'
+      fullPath: '/daily-quiz'
+      preLoaderRoute: typeof AuthenticatedDailyQuizIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
@@ -524,6 +545,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedChallengesIndexLazyRoute: typeof AuthenticatedChallengesIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
+  AuthenticatedDailyQuizIndexLazyRoute: typeof AuthenticatedDailyQuizIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
@@ -538,6 +560,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedChallengesIndexLazyRoute: AuthenticatedChallengesIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
+  AuthenticatedDailyQuizIndexLazyRoute: AuthenticatedDailyQuizIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
@@ -568,6 +591,7 @@ export interface FileRoutesByFullPath {
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/challenges': typeof AuthenticatedChallengesIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
+  '/daily-quiz': typeof AuthenticatedDailyQuizIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
@@ -594,6 +618,7 @@ export interface FileRoutesByTo {
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/challenges': typeof AuthenticatedChallengesIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
+  '/daily-quiz': typeof AuthenticatedDailyQuizIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
@@ -624,6 +649,7 @@ export interface FileRoutesById {
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/challenges/': typeof AuthenticatedChallengesIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
+  '/_authenticated/daily-quiz/': typeof AuthenticatedDailyQuizIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
@@ -654,6 +680,7 @@ export interface FileRouteTypes {
     | '/apps'
     | '/challenges'
     | '/chats'
+    | '/daily-quiz'
     | '/help-center'
     | '/settings/'
     | '/tasks'
@@ -679,6 +706,7 @@ export interface FileRouteTypes {
     | '/apps'
     | '/challenges'
     | '/chats'
+    | '/daily-quiz'
     | '/help-center'
     | '/settings'
     | '/tasks'
@@ -707,6 +735,7 @@ export interface FileRouteTypes {
     | '/_authenticated/apps/'
     | '/_authenticated/challenges/'
     | '/_authenticated/chats/'
+    | '/_authenticated/daily-quiz/'
     | '/_authenticated/help-center/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
@@ -777,6 +806,7 @@ export const routeTree = rootRoute
         "/_authenticated/apps/",
         "/_authenticated/challenges/",
         "/_authenticated/chats/",
+        "/_authenticated/daily-quiz/",
         "/_authenticated/help-center/",
         "/_authenticated/tasks/",
         "/_authenticated/users/"
@@ -860,6 +890,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/chats/": {
       "filePath": "_authenticated/chats/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/daily-quiz/": {
+      "filePath": "_authenticated/daily-quiz/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/help-center/": {

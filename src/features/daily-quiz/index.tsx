@@ -29,11 +29,12 @@ export default function Tasks() {
               Here&apos;s a list of your tasks for this month!
             </p>
           </div>
-          <TasksPrimaryButtons />
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
           <DataTable data={tasks} columns={columns} />
         </div> */}
+
+        <TasksPrimaryButtons />
       </Main>
 
       <TasksDialogs />
