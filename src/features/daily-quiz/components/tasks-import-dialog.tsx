@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import Papa from 'papaparse'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { normalize } from '../data/file'
 
 const formSchema = z.object({
   file: z
@@ -51,20 +53,49 @@ export function TasksImportDialog({ open, onOpenChange }: Props) {
     const file = form.getValues('file')
 
     if (file && file[0]) {
-      const fileDetails = {
-        name: file[0].name,
-        size: file[0].size,
-        type: file[0].type,
-      }
-      toast({
-        title: 'You have imported the following file:',
-        description: (
-          <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-            <code className='text-white'>
-              {JSON.stringify(fileDetails, null, 2)}
-            </code>
-          </pre>
-        ),
+      Papa.parse(file[0], {
+        complete: (results) => {
+          try {
+            console.log('Parsed CSV data:', results.data)
+
+            const normalizedData = normalize(results.data)
+
+            console.log('Normalized data:', normalizedData)
+
+            toast({
+              title: 'CSV Import Successful',
+              description: (
+                <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
+                  <code className='text-white'>
+                    {JSON.stringify(
+                      {
+                        total: results.data.length,
+                      },
+                      null,
+                      2
+                    )}
+                  </code>
+                </pre>
+              ),
+            })
+          } catch (err) {
+            console.error('Error parsing CSV:', err)
+            toast({
+              title: 'Error parsing CSV',
+              description: err instanceof Error ? err.message : 'Unknown error',
+              variant: 'destructive',
+            })
+          }
+        },
+        header: true,
+        error: (error) => {
+          console.error('Error parsing CSV:', error)
+          toast({
+            title: 'Error parsing CSV',
+            description: error.message,
+            variant: 'destructive',
+          })
+        },
       })
     }
     onOpenChange(false)
@@ -94,7 +125,12 @@ export function TasksImportDialog({ open, onOpenChange }: Props) {
                 <FormItem className='mb-2 space-y-1'>
                   <FormLabel>File</FormLabel>
                   <FormControl>
-                    <Input type='file' {...fileRef} className='h-8' />
+                    <Input
+                      type='file'
+                      accept='.csv'
+                      {...fileRef}
+                      className='h-8'
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
