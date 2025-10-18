@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { format } from 'date-fns'
 import {
   IconMessages,
@@ -10,8 +10,10 @@ import {
   IconX,
   IconUsers,
   IconPlus,
+  IconDotsVertical,
 } from '@tabler/icons-react'
 import config from '@/config/microservices'
+import TimeAgo from 'react-timeago'
 import { chatService } from '@/lib/microservices'
 import { cn } from '@/lib/utils'
 import {
@@ -34,8 +36,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -56,6 +63,10 @@ export default function Chats() {
   const [showCreateRoomDialog, setShowCreateRoomDialog] = useState(false)
   const [newRoomName, setNewRoomName] = useState('')
   const [newRoomMessage, setNewRoomMessage] = useState('')
+  const [showBlockedUsersDialog, setShowBlockedUsersDialog] = useState(false)
+
+  // Ref for auto-scrolling messages
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   // Use React Query hooks for data fetching
   const {
@@ -69,9 +80,11 @@ export default function Chats() {
     data: messages = [],
     isLoading: messagesLoading,
     error: messagesError,
+    refetch: refetchMessages,
   } = useChatRoomMessages(selectedRoom)
 
-  const { data: roomStats } = useChatRoomStats(selectedRoom)
+  const { data: roomStats, refetch: refetchStats } =
+    useChatRoomStats(selectedRoom)
 
   const {
     data: blockedUsers = [],
@@ -94,11 +107,16 @@ export default function Chats() {
             // Handle disconnect if needed
           },
           onMessage: (message: ChatMessageEvent) => {
-            // Messages are now handled by React Query
-            // The WebSocket message will trigger a refetch
+            // Trigger immediate refetches for real-time updates
+            console.log('WebSocket message received:', message)
+
+            // Refetch rooms list to update counts
+            refetchRooms()
+
+            // If this message is for the currently selected room, refetch messages and stats
             if (selectedRoom === message.roomId) {
-              // Optionally refetch messages for the current room
-              // This will be handled by the refetchInterval in useQuery
+              refetchMessages()
+              refetchStats()
             }
           },
           onError: (error) => {
@@ -128,6 +146,24 @@ export default function Chats() {
       chatWebSocket.disconnect()
     }
   }, [selectedRoom])
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      )
+      if (scrollContainer) {
+        // Use setTimeout to ensure DOM is updated
+        setTimeout(() => {
+          scrollContainer.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: 'smooth',
+          })
+        }, 100)
+      }
+    }
+  }, [messages])
 
   // Generate random room name
   const generateRandomRoomName = () => {
@@ -289,6 +325,11 @@ export default function Chats() {
       await chatService.sendMessage(messageData)
 
       setNewMessage('')
+
+      // Trigger immediate refetches for real-time updates
+      refetchRooms() // Update room message counts
+      refetchMessages() // Update messages list
+      refetchStats() // Update room stats
     } catch (error) {
       console.error('Error sending message:', error)
       setError(
@@ -355,7 +396,7 @@ export default function Chats() {
       </Header>
 
       <Main fixed>
-        <div className='flex h-full gap-6'>
+        <div className='flex h-[calc(100vh-8rem)] gap-6'>
           {/* Left Sidebar - Rooms List */}
           <div className='gap-4ś flex h-full w-80 flex-col'>
             <Card className='h-full'>
@@ -483,13 +524,39 @@ export default function Chats() {
                 </Card>
 
                 {/* Messages */}
-                <Card className='flex-1'>
-                  <CardHeader>
-                    <CardTitle>Messages</CardTitle>
+                <Card className='flex flex-1 flex-col'>
+                  <CardHeader className='flex-shrink-0'>
+                    <div className='flex items-center justify-between'>
+                      <CardTitle>Messages</CardTitle>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size='sm' variant='ghost'>
+                            <IconDotsVertical size={16} />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align='end'>
+                          <DropdownMenuItem
+                            onClick={() => setShowBlockDialog(true)}
+                          >
+                            <IconBan size={16} className='mr-2' />
+                            Block User
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setShowBlockedUsersDialog(true)}
+                          >
+                            <IconUsers size={16} className='mr-2' />
+                            View Blocked Users ({blockedUsers.length})
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <ScrollArea className='h-64'>
-                      <div className='space-y-2'>
+                  <CardContent className='flex-1 overflow-hidden p-0'>
+                    <ScrollArea
+                      ref={scrollAreaRef}
+                      className='h-[30rem] rounded-lg border'
+                    >
+                      <div className='space-y-2 p-4'>
                         {messagesLoading ? (
                           <div className='py-4 text-center'>
                             <div className='mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-primary'></div>
@@ -502,7 +569,7 @@ export default function Chats() {
                             <div
                               key={message.id}
                               className={cn(
-                                'rounded-lg p-3',
+                                'flex gap-2 rounded-lg p-1',
                                 message.email === config.admin.email
                                   ? 'border-l-4 border-primary bg-primary/10'
                                   : 'bg-muted/50'
@@ -510,7 +577,7 @@ export default function Chats() {
                             >
                               <div className='flex items-center justify-between'>
                                 <div className='flex items-center gap-2'>
-                                  <span className='font-medium'>
+                                  <span className='text-xs font-semibold'>
                                     {message.name}
                                   </span>
                                   <Badge variant='outline' className='text-xs'>
@@ -525,11 +592,14 @@ export default function Chats() {
                                     </Badge>
                                   )}
                                 </div>
-                                <span className='text-xs text-muted-foreground'>
-                                  {format(new Date(message.createdAt), 'HH:mm')}
-                                </span>
                               </div>
                               <p className='mt-1 text-sm'>{message.message}</p>
+
+                              <div className='ml-auto flex items-center gap-2'>
+                                <span className='text-xs text-muted-foreground'>
+                                  <TimeAgo date={message.createdAt} />
+                                </span>
+                              </div>
                             </div>
                           ))
                         ) : (
@@ -561,116 +631,6 @@ export default function Chats() {
                         <IconSend size={16} />
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Blocked Users */}
-                <Card>
-                  <CardHeader>
-                    <div className='flex items-center justify-between'>
-                      <CardTitle className='flex items-center gap-2'>
-                        <IconBan size={20} />
-                        Blocked Users
-                      </CardTitle>
-                      <Dialog
-                        open={showBlockDialog}
-                        onOpenChange={setShowBlockDialog}
-                      >
-                        <DialogTrigger asChild>
-                          <Button size='sm'>Block User</Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Block User</DialogTitle>
-                          </DialogHeader>
-                          <div className='space-y-4'>
-                            <div>
-                              <Label htmlFor='email'>Email</Label>
-                              <Input
-                                id='email'
-                                placeholder='user@example.com'
-                                value={userToBlock}
-                                onChange={(e) => setUserToBlock(e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor='reason'>Reason</Label>
-                              <Textarea
-                                id='reason'
-                                placeholder='Reason for blocking...'
-                                value={blockReason}
-                                onChange={(e) => setBlockReason(e.target.value)}
-                              />
-                            </div>
-                            <div className='flex justify-end gap-2'>
-                              <Button
-                                variant='outline'
-                                onClick={() => setShowBlockDialog(false)}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                onClick={blockUser}
-                                disabled={
-                                  !userToBlock.trim() || !blockReason.trim()
-                                }
-                              >
-                                Block User
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className='h-32'>
-                      <div className='space-y-2'>
-                        {blockedUsersLoading ? (
-                          <div className='py-4 text-center'>
-                            <div className='mx-auto h-4 w-4 animate-spin rounded-full border-b-2 border-primary'></div>
-                            <p className='mt-2 text-sm text-muted-foreground'>
-                              Loading blocked users...
-                            </p>
-                          </div>
-                        ) : blockedUsers.length > 0 ? (
-                          blockedUsers.map((user) => (
-                            <div
-                              key={user.id}
-                              className='flex items-center justify-between rounded border p-2'
-                            >
-                              <div>
-                                <span className='font-medium'>
-                                  {user.email}
-                                </span>
-                                <p className='text-sm text-muted-foreground'>
-                                  {user.reason}
-                                </p>
-                              </div>
-                              <div className='flex items-center gap-2'>
-                                <span className='text-xs text-muted-foreground'>
-                                  {format(
-                                    new Date(user.createdAt),
-                                    'MMM d, HH:mm'
-                                  )}
-                                </span>
-                                <Button
-                                  size='sm'
-                                  variant='outline'
-                                  onClick={() => unblockUser(user.email)}
-                                >
-                                  <IconX size={14} />
-                                </Button>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <p className='py-4 text-center text-sm text-muted-foreground'>
-                            No blocked users
-                          </p>
-                        )}
-                      </div>
-                    </ScrollArea>
                   </CardContent>
                 </Card>
               </>
@@ -753,6 +713,110 @@ export default function Chats() {
                     </Button>
                   </div>
                 </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Block User Dialog */}
+            <Dialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Block User</DialogTitle>
+                </DialogHeader>
+                <div className='space-y-4'>
+                  <div>
+                    <Label htmlFor='email'>Email</Label>
+                    <Input
+                      id='email'
+                      placeholder='user@example.com'
+                      value={userToBlock}
+                      onChange={(e) => setUserToBlock(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor='reason'>Reason</Label>
+                    <Textarea
+                      id='reason'
+                      placeholder='Reason for blocking...'
+                      value={blockReason}
+                      onChange={(e) => setBlockReason(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <div className='flex justify-end gap-2'>
+                    <Button
+                      variant='outline'
+                      onClick={() => setShowBlockDialog(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={blockUser}
+                      disabled={!userToBlock.trim() || !blockReason.trim()}
+                    >
+                      Block User
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Blocked Users Dialog */}
+            <Dialog
+              open={showBlockedUsersDialog}
+              onOpenChange={setShowBlockedUsersDialog}
+            >
+              <DialogContent className='sm:max-w-lg'>
+                <DialogHeader>
+                  <DialogTitle className='flex items-center gap-2'>
+                    <IconBan size={20} />
+                    Blocked Users ({blockedUsers.length})
+                  </DialogTitle>
+                </DialogHeader>
+                <ScrollArea className='max-h-96'>
+                  <div className='space-y-2'>
+                    {blockedUsersLoading ? (
+                      <div className='py-4 text-center'>
+                        <div className='mx-auto h-4 w-4 animate-spin rounded-full border-b-2 border-primary'></div>
+                        <p className='mt-2 text-sm text-muted-foreground'>
+                          Loading blocked users...
+                        </p>
+                      </div>
+                    ) : blockedUsers.length > 0 ? (
+                      blockedUsers.map((user) => (
+                        <div
+                          key={user.id}
+                          className='flex items-center justify-between rounded border p-3'
+                        >
+                          <div className='flex-1'>
+                            <span className='font-medium'>{user.email}</span>
+                            <p className='text-sm text-muted-foreground'>
+                              {user.reason}
+                            </p>
+                            <span className='text-xs text-muted-foreground'>
+                              Blocked on{' '}
+                              {format(
+                                new Date(user.createdAt),
+                                'MMM d, yyyy HH:mm'
+                              )}
+                            </span>
+                          </div>
+                          <Button
+                            size='sm'
+                            variant='outline'
+                            onClick={() => unblockUser(user.email)}
+                          >
+                            <IconX size={14} className='mr-1' />
+                            Unblock
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className='py-8 text-center text-sm text-muted-foreground'>
+                        No blocked users
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
               </DialogContent>
             </Dialog>
           </div>

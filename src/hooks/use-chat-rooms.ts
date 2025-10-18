@@ -56,8 +56,8 @@ export const useChatRooms = () => {
                 return getFallbackRooms()
             }
         },
-        staleTime: 30 * 1000, // 30 seconds
-        refetchInterval: 60 * 1000, // Refetch every minute
+        staleTime: 5 * 1000, // 5 seconds - more responsive
+        refetchInterval: 10 * 1000, // Refetch every 10 seconds - faster updates
         refetchOnWindowFocus: true,
         retry: 2,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -73,8 +73,8 @@ export const useChatRoomMessages = (roomId: string | null) => {
             return response.data || []
         },
         enabled: !!roomId,
-        staleTime: 30 * 1000, // 30 seconds
-        refetchInterval: 30 * 1000, // Refetch every 30 seconds (less aggressive)
+        staleTime: 2 * 1000, // 2 seconds - very responsive
+        refetchInterval: 5 * 1000, // Refetch every 5 seconds - real-time feel
     })
 }
 
@@ -87,8 +87,8 @@ export const useChatRoomStats = (roomId: string | null) => {
             return response.data || null
         },
         enabled: !!roomId,
-        staleTime: 30 * 1000, // 30 seconds
-        refetchInterval: 60 * 1000, // Refetch every minute
+        staleTime: 5 * 1000, // 5 seconds - more responsive
+        refetchInterval: 10 * 1000, // Refetch every 10 seconds - faster updates
     })
 }
 
