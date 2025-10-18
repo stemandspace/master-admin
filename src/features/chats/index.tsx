@@ -9,6 +9,7 @@ import {
   IconAlertCircle,
   IconX,
   IconUsers,
+  IconPlus,
 } from '@tabler/icons-react'
 import config from '@/config/microservices'
 import { chatService } from '@/lib/microservices'
@@ -52,6 +53,9 @@ export default function Chats() {
   const [showBlockDialog, setShowBlockDialog] = useState(false)
   const [userToBlock, setUserToBlock] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [showCreateRoomDialog, setShowCreateRoomDialog] = useState(false)
+  const [newRoomName, setNewRoomName] = useState('')
+  const [newRoomMessage, setNewRoomMessage] = useState('')
 
   // Use React Query hooks for data fetching
   const {
@@ -125,17 +129,118 @@ export default function Chats() {
     }
   }, [selectedRoom])
 
-  // Test API connection
-  const testApiConnection = async () => {
+  // Generate random room name
+  const generateRandomRoomName = () => {
+    const adjectives = [
+      'elephant',
+      'tiger',
+      'dolphin',
+      'eagle',
+      'butterfly',
+      'penguin',
+      'koala',
+      'panda',
+      'lion',
+      'whale',
+      'falcon',
+      'cheetah',
+      'octopus',
+      'peacock',
+      'giraffe',
+      'zebra',
+      'flamingo',
+      'toucan',
+      'jaguar',
+      'leopard',
+      'rhino',
+      'hippo',
+      'kangaroo',
+      'sloth',
+    ]
+    const activities = [
+      'party',
+      'meeting',
+      'chat',
+      'discussion',
+      'hangout',
+      'gathering',
+      'session',
+      'conference',
+      'workshop',
+      'seminar',
+      'summit',
+      'retreat',
+      'festival',
+      'celebration',
+      'convention',
+      'symposium',
+      'forum',
+      'debate',
+      'brainstorm',
+      'collaboration',
+    ]
+    const locations = [
+      'room',
+      'space',
+      'zone',
+      'area',
+      'hub',
+      'center',
+      'lounge',
+      'chamber',
+      'studio',
+      'theater',
+      'hall',
+      'gallery',
+      'cafe',
+      'library',
+      'garden',
+      'terrace',
+    ]
+
+    const randomAdjective =
+      adjectives[Math.floor(Math.random() * adjectives.length)]
+    const randomActivity =
+      activities[Math.floor(Math.random() * activities.length)]
+    const randomLocation =
+      locations[Math.floor(Math.random() * locations.length)]
+    const randomNumber = Math.floor(Math.random() * 9999) + 1
+
+    return `${randomAdjective}-${randomActivity}-${randomLocation}-${randomNumber}`
+  }
+
+  // Initialize random room name when dialog opens
+  const openCreateRoomDialog = () => {
+    setNewRoomName(generateRandomRoomName())
+    setNewRoomMessage('Welcome to our new chat room! 🎉')
+    setShowCreateRoomDialog(true)
+  }
+
+  // Create new room
+  const createNewRoom = async () => {
+    if (!newRoomName.trim() || !newRoomMessage.trim()) return
+
     try {
-      console.log('Testing API connection...')
-      const response = await fetch('http://localhost:3000/api/rooms')
-      const data = await response.json()
-      console.log('Direct API test result:', data)
-      alert(`API Test Result: ${JSON.stringify(data, null, 2)}`)
+      // Send the initial message to create the room
+      await chatService.sendMessage({
+        roomId: newRoomName.trim(),
+        name: config.admin.name,
+        email: config.admin.email,
+        message: newRoomMessage.trim(),
+      })
+
+      // Close dialog and reset form
+      setShowCreateRoomDialog(false)
+      setNewRoomName('')
+      setNewRoomMessage('')
+
+      // Refresh rooms list
+      refetchRooms()
+
+      // Select the new room
+      await selectRoom(newRoomName.trim())
     } catch (error) {
-      console.error('API test failed:', error)
-      alert(`API Test Failed: ${error}`)
+      setError(error instanceof Error ? error.message : 'Failed to create room')
     }
   }
 
@@ -263,18 +368,18 @@ export default function Chats() {
                   <div className='flex gap-2'>
                     <Button
                       size='sm'
+                      variant='default'
+                      onClick={openCreateRoomDialog}
+                    >
+                      <IconPlus size={16} />
+                    </Button>
+                    <Button
+                      size='sm'
                       variant='outline'
                       onClick={() => refetchRooms()}
                       disabled={roomsLoading}
                     >
                       <IconRefresh size={16} />
-                    </Button>
-                    <Button
-                      size='sm'
-                      variant='secondary'
-                      onClick={testApiConnection}
-                    >
-                      Test API
                     </Button>
                   </div>
                 </div>
@@ -307,7 +412,7 @@ export default function Chats() {
                         <div
                           key={room.roomId}
                           className={cn(
-                            'cursor-pointer rounded-lg border p-3 transition-colors',
+                            'cursor-pointer rounded-lg border p-2 px-4 transition-colors',
                             selectedRoom === room.roomId
                               ? 'bg-primary text-primary-foreground'
                               : 'hover:bg-muted'
@@ -315,29 +420,22 @@ export default function Chats() {
                           onClick={() => selectRoom(room.roomId)}
                         >
                           <div className='flex items-center justify-between'>
-                            <div>
-                              <h3 className='font-medium'>{room.name}</h3>
-                              <p className='text-sm opacity-70'>
+                            <div className='flex-1'>
+                              <h3 className='line-clamp-1 text-sm font-medium'>
+                                {room.name}
+                              </h3>
+                              <p className='text-xs opacity-70'>
                                 {room.roomId}
                               </p>
                             </div>
-                            <div className='text-right'>
-                              <Badge
-                                variant={
-                                  room.isActive ? 'default' : 'secondary'
-                                }
-                              >
-                                {room.isActive ? 'Active' : 'Inactive'}
-                              </Badge>
-                              <div className='mt-1 text-xs'>
-                                <div className='flex items-center gap-1'>
-                                  <IconMessages size={12} />
-                                  {room.messageCount}
-                                </div>
-                                <div className='flex items-center gap-1'>
-                                  <IconUsers size={12} />
-                                  {room.userCount}
-                                </div>
+                            <div className='flex items-center gap-3 text-xs'>
+                              <div className='flex items-center gap-1'>
+                                <IconMessages size={12} />
+                                <span>{room.messageCount}</span>
+                              </div>
+                              <div className='flex items-center gap-1'>
+                                <IconUsers size={12} />
+                                <span>{room.userCount}</span>
                               </div>
                             </div>
                           </div>
@@ -601,6 +699,62 @@ export default function Chats() {
                 </AlertDescription>
               </Alert>
             )}
+
+            {/* Create Room Dialog */}
+            <Dialog
+              open={showCreateRoomDialog}
+              onOpenChange={setShowCreateRoomDialog}
+            >
+              <DialogContent className='sm:max-w-md'>
+                <DialogHeader>
+                  <DialogTitle>Create New Chat Room</DialogTitle>
+                </DialogHeader>
+                <div className='space-y-4'>
+                  <div>
+                    <Label htmlFor='roomName'>Room Name</Label>
+                    <div className='flex gap-2'>
+                      <Input
+                        id='roomName'
+                        value={newRoomName}
+                        onChange={(e) => setNewRoomName(e.target.value)}
+                        placeholder='Enter room name...'
+                      />
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={() => setNewRoomName(generateRandomRoomName())}
+                      >
+                        Random
+                      </Button>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor='roomMessage'>Starting Message</Label>
+                    <Textarea
+                      id='roomMessage'
+                      value={newRoomMessage}
+                      onChange={(e) => setNewRoomMessage(e.target.value)}
+                      placeholder='Enter your starting message...'
+                      rows={3}
+                    />
+                  </div>
+                  <div className='flex justify-end gap-2'>
+                    <Button
+                      variant='outline'
+                      onClick={() => setShowCreateRoomDialog(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={createNewRoom}
+                      disabled={!newRoomName.trim() || !newRoomMessage.trim()}
+                    >
+                      Create Room
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </Main>
