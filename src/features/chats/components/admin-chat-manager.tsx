@@ -6,10 +6,7 @@ import {
   IconBan,
   IconSend,
   IconRefresh,
-  IconEye,
-  IconEyeOff,
   IconAlertCircle,
-  IconCheck,
   IconX,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
@@ -19,7 +16,6 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'

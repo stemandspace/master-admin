@@ -1,4 +1,4 @@
-import { IconDownload, IconPlus, IconUpload } from '@tabler/icons-react'
+import { IconDownload, IconUpload } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { useTasks } from '../context/tasks-context'
 

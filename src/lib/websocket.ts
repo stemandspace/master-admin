@@ -72,8 +72,7 @@ class WebSocketClient {
     private config: WebSocketConfig
     private handlers: WebSocketEventHandlers = {}
     private isConnected = false
-    private reconnectAttempts = 0
-    private maxReconnectAttempts = 5
+    // Removed unused reconnect tracking fields
 
     constructor(config: WebSocketConfig) {
         this.config = {
@@ -111,7 +110,7 @@ class WebSocketClient {
             this.socket.on('connect', () => {
                 console.log('WebSocket connected')
                 this.isConnected = true
-                this.reconnectAttempts = 0
+                // reset reconnect state if you add tracking in the future
                 this.handlers.onConnect?.()
                 resolve()
             })
@@ -212,7 +211,8 @@ class WebSocketClient {
                 return
             }
 
-            this.socket.emit('sendMessage', { name, email, message }, (response: any) => {
+            // Include roomId to use the parameter and for potential server-side validation
+            this.socket.emit('sendMessage', { roomId, name, email, message }, (response: any) => {
                 if (response?.error) {
                     reject(new Error(response.error))
                 } else {
@@ -331,6 +331,11 @@ class WebSocketRegistry {
         })
         return status
     }
+
+    // Expose all clients for iteration
+    getAll(): WebSocketClient[] {
+        return Array.from(this.clients.values())
+    }
 }
 
 // Create WebSocket registry
@@ -353,7 +358,7 @@ webSocketRegistry.register('chat', chatWebSocket)
 
 // Export the registry and individual clients
 export { webSocketRegistry, chatWebSocket }
-export type { WebSocketConfig, WebSocketEventHandlers }
+export type { WebSocketConfig }
 
 // Utility functions for WebSocket management
 export const webSocketUtils = {
