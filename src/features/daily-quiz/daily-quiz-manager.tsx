@@ -20,6 +20,7 @@ import {
   Line,
 } from 'recharts'
 import { cn } from '@/lib/utils'
+import strapi from '@/utils/strapi'
 import { toast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -727,42 +728,25 @@ export function DailyQuizManager() {
         quizzes,
       }
 
-      // Make API call to bulk upload endpoint using localhost
-      const response = await fetch(
-        'http://localhost:1337/api/daily-quiz/bulk-upload',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        }
-      )
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(
-          errorData.error?.message ||
-            errorData.message ||
-            `HTTP error! status: ${response.status}`
-        )
-      }
-
-      const responseData = await response.json()
+      // Make API call to bulk upload endpoint using strapi URL
+      const response = await strapi.post('/daily-quiz/bulk-upload', payload)
 
       toast({
         title: 'Saved Successfully',
         description: `${quizzes.length} quiz(es) have been uploaded to the backend.`,
       })
 
-      console.log('Saved to backend:', responseData)
+      console.log('Saved to backend:', response.data)
     } catch (error: any) {
       console.error('Error saving to backend:', error)
       toast({
         variant: 'destructive',
         title: 'Save Failed',
         description:
-          error.message || 'Failed to save quiz data to the backend.',
+          error.response?.data?.error?.message ||
+          error.response?.data?.message ||
+          error.message ||
+          'Failed to save quiz data to the backend.',
       })
     } finally {
       setIsSaving(false)
