@@ -1,6 +1,8 @@
 import { useLiveEvents } from '../context/live-events-context'
 import { LiveEventActionDialog } from './live-event-action-dialog'
 import { LiveEventDeleteDialog } from './live-event-delete-dialog'
+import { RewardNotificationDialog } from './reward-notification-dialog'
+import { SelectWinnersDialog } from './select-winners-dialog'
 
 export function LiveEventDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useLiveEvents()
@@ -19,6 +21,30 @@ export function LiveEventDialogs() {
             open={open === 'edit'}
             onOpenChange={() => {
               setOpen('edit')
+              setTimeout(() => {
+                setCurrentRow(null)
+              }, 500)
+            }}
+            currentRow={currentRow}
+          />
+
+          <SelectWinnersDialog
+            key={`live-event-select-winners-${currentRow.id}`}
+            open={open === 'select-winners'}
+            onOpenChange={() => {
+              setOpen('select-winners')
+              setTimeout(() => {
+                setCurrentRow(null)
+              }, 500)
+            }}
+            currentRow={currentRow}
+          />
+
+          <RewardNotificationDialog
+            key={`live-event-reward-notification-${currentRow.id}`}
+            open={open === 'reward-notification'}
+            onOpenChange={() => {
+              setOpen('reward-notification')
               setTimeout(() => {
                 setCurrentRow(null)
               }, 500)

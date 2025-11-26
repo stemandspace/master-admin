@@ -2,7 +2,12 @@ import React, { useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
 import { LiveEvent } from '../data/schema'
 
-type LiveEventsDialogType = 'add' | 'edit' | 'delete'
+type LiveEventsDialogType =
+  | 'add'
+  | 'edit'
+  | 'delete'
+  | 'select-winners'
+  | 'reward-notification'
 
 interface LiveEventsContextType {
   open: LiveEventsDialogType | null

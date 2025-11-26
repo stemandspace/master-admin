@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { MultiSelect } from '@/components/multi-select'
 import { RewardIdSelector } from '@/components/reward-id-selector'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { LiveEvent } from '../data/schema'
@@ -45,7 +44,6 @@ const formSchema = z.object({
   winners_rewards: z.array(z.string()).optional(),
   participation_rewards: z.array(z.string()).optional(),
   winners: z.array(z.string()).optional(),
-  participants: z.array(z.string()).optional(),
 })
 
 type LiveEventForm = z.infer<typeof formSchema>
@@ -69,12 +67,12 @@ export function LiveEventActionDialog({
     queryFn: async () => await getLives(),
   })
 
-  const { data: users, isLoading: isLoadingUsers } = useQuery({
+  const { data: users } = useQuery({
     queryKey: ['users'],
     queryFn: async () => await getUsers(),
   })
 
-  const { data: participants, isLoading: isLoadingParticipants } = useQuery({
+  const { data: _participants } = useQuery({
     queryKey: ['live-participants', currentRow?.live?.id?.toString()],
     queryFn: async () =>
       await getLiveParticipants({
@@ -106,10 +104,6 @@ export function LiveEventActionDialog({
             currentRow.winners?.map((w: any) =>
               typeof w === 'object' ? w.id?.toString() : w?.toString()
             ) || [],
-          participants:
-            currentRow.participants?.map((p: any) =>
-              typeof p === 'object' ? p.id?.toString() : p?.toString()
-            ) || [],
         }
       : {
           title: '',
@@ -119,7 +113,6 @@ export function LiveEventActionDialog({
           winners_rewards: [],
           participation_rewards: [],
           winners: [],
-          participants: [],
         },
   })
 
@@ -164,13 +157,6 @@ export function LiveEventActionDialog({
               }
               return String(w)
             }) || [],
-          participants:
-            currentRow.participants?.map((p: any) => {
-              if (typeof p === 'object' && p !== null) {
-                return p.id?.toString() || String(p.id) || ''
-              }
-              return String(p)
-            }) || [],
         })
       } else {
         form.reset({
@@ -181,7 +167,6 @@ export function LiveEventActionDialog({
           winners_rewards: [],
           participation_rewards: [],
           winners: [],
-          participants: [],
         })
       }
     }
@@ -237,9 +222,6 @@ export function LiveEventActionDialog({
     }
     if (values.winners && values.winners.length > 0) {
       submitData.winners = values.winners.map((id) => Number(id))
-    }
-    if (values.participants && values.participants.length > 0) {
-      submitData.participants = values.participants.map((id) => Number(id))
     }
 
     if (isEdit && currentRow) {
@@ -413,83 +395,61 @@ export function LiveEventActionDialog({
               <FormField
                 control={form.control}
                 name='winners'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-start gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 pt-2 text-right'>
-                      Winners
-                    </FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        options={
-                          users?.map((user: any) => ({
-                            label:
-                              `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
-                              user.username ||
-                              user.email ||
-                              `User #${user.id}`,
-                            value: user.id?.toString() || '',
-                          })) || []
-                        }
-                        selected={field.value || []}
-                        onChange={field.onChange}
-                        placeholder='Select winners'
-                        className='col-span-4'
-                        isPending={isLoadingUsers}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='participants'
-                render={({ field }) => (
-                  <FormItem className='grid grid-cols-6 items-start gap-x-4 gap-y-1 space-y-0'>
-                    <FormLabel className='col-span-2 pt-2 text-right'>
-                      Participants
-                    </FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        options={
-                          users?.map((user: any) => ({
-                            label:
-                              `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
-                              user.username ||
-                              user.email ||
-                              `User #${user.id}`,
-                            value: user.id?.toString() || '',
-                          })) || []
-                        }
-                        selected={field.value || []}
-                        onChange={field.onChange}
-                        placeholder='Select participants'
-                        className='col-span-4'
-                        isPending={isLoadingUsers}
-                      />
-                    </FormControl>
-                    <FormMessage className='col-span-4 col-start-3' />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const winnerIds = field.value || []
+                  const winnerUsers = winnerIds
+                    .map((id: string) => {
+                      const user = users?.find(
+                        (u: any) => u.id?.toString() === id.toString()
+                      )
+                      return user
+                        ? {
+                            id: user.id?.toString() || id,
+                            email: user.email || 'N/A',
+                          }
+                        : { id: id.toString(), email: 'N/A' }
+                    })
+                    .filter((w: any) => w !== null)
+
+                  return (
+                    <FormItem className='grid grid-cols-6 items-start gap-x-4 gap-y-1 space-y-0'>
+                      <FormLabel className='col-span-2 pt-2 text-right'>
+                        Winners
+                      </FormLabel>
+                      <FormControl>
+                        <div className='col-span-4'>
+                          {winnerUsers.length > 0 ? (
+                            <div className='space-y-2 rounded-md border bg-muted/50 p-3'>
+                              {winnerUsers.map((winner: any, index: number) => (
+                                <div
+                                  key={winner.id || index}
+                                  className='flex items-center justify-between text-sm'
+                                >
+                                  <span className='font-medium'>
+                                    ID: {winner.id}
+                                  </span>
+                                  <span className='ml-4 text-muted-foreground'>
+                                    {winner.email}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className='rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground'>
+                              No winners selected. Use the &quot;Select
+                              Winners&quot; button to choose winners from
+                              participants.
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage className='col-span-4 col-start-3' />
+                    </FormItem>
+                  )
+                }}
               />
             </form>
           </Form>
-
-          {participants && participants.length > 0 && (
-            <div className='mt-4'>
-              <div className='mb-2 font-semibold'>Event Participants</div>
-              <ul className='list-disc pl-6 text-sm text-muted-foreground'>
-                {participants.map((p: any) => (
-                  <li key={p.id}>
-                    {`${p.firstName || ''} ${p.lastName || ''}`.trim() ||
-                      p.username ||
-                      p.email ||
-                      `User #${p.id}`}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </ScrollArea>
         <DialogFooter>
           <Button
