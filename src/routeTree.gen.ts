@@ -43,6 +43,9 @@ const AuthenticatedTasksIndexLazyImport = createFileRoute(
 const AuthenticatedSettingsIndexLazyImport = createFileRoute(
   '/_authenticated/settings/',
 )()
+const AuthenticatedLiveEventsIndexLazyImport = createFileRoute(
+  '/_authenticated/live-events/',
+)()
 const AuthenticatedHelpCenterIndexLazyImport = createFileRoute(
   '/_authenticated/help-center/',
 )()
@@ -205,6 +208,17 @@ const AuthenticatedSettingsIndexLazyRoute =
     getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/settings/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedLiveEventsIndexLazyRoute =
+  AuthenticatedLiveEventsIndexLazyImport.update({
+    id: '/live-events/',
+    path: '/live-events/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/live-events/index.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const AuthenticatedHelpCenterIndexLazyRoute =
@@ -486,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/live-events/': {
+      id: '/_authenticated/live-events/'
+      path: '/live-events'
+      fullPath: '/live-events'
+      preLoaderRoute: typeof AuthenticatedLiveEventsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/settings/': {
       id: '/_authenticated/settings/'
       path: '/'
@@ -547,6 +568,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
   AuthenticatedDailyQuizIndexLazyRoute: typeof AuthenticatedDailyQuizIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
+  AuthenticatedLiveEventsIndexLazyRoute: typeof AuthenticatedLiveEventsIndexLazyRoute
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
 }
@@ -562,6 +584,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
   AuthenticatedDailyQuizIndexLazyRoute: AuthenticatedDailyQuizIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
+  AuthenticatedLiveEventsIndexLazyRoute: AuthenticatedLiveEventsIndexLazyRoute,
   AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
 }
@@ -593,6 +616,7 @@ export interface FileRoutesByFullPath {
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/daily-quiz': typeof AuthenticatedDailyQuizIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/live-events': typeof AuthenticatedLiveEventsIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
@@ -620,6 +644,7 @@ export interface FileRoutesByTo {
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
   '/daily-quiz': typeof AuthenticatedDailyQuizIndexLazyRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/live-events': typeof AuthenticatedLiveEventsIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
@@ -651,6 +676,7 @@ export interface FileRoutesById {
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
   '/_authenticated/daily-quiz/': typeof AuthenticatedDailyQuizIndexLazyRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
+  '/_authenticated/live-events/': typeof AuthenticatedLiveEventsIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
@@ -682,6 +708,7 @@ export interface FileRouteTypes {
     | '/chats'
     | '/daily-quiz'
     | '/help-center'
+    | '/live-events'
     | '/settings/'
     | '/tasks'
     | '/users'
@@ -708,6 +735,7 @@ export interface FileRouteTypes {
     | '/chats'
     | '/daily-quiz'
     | '/help-center'
+    | '/live-events'
     | '/settings'
     | '/tasks'
     | '/users'
@@ -737,6 +765,7 @@ export interface FileRouteTypes {
     | '/_authenticated/chats/'
     | '/_authenticated/daily-quiz/'
     | '/_authenticated/help-center/'
+    | '/_authenticated/live-events/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
@@ -808,6 +837,7 @@ export const routeTree = rootRoute
         "/_authenticated/chats/",
         "/_authenticated/daily-quiz/",
         "/_authenticated/help-center/",
+        "/_authenticated/live-events/",
         "/_authenticated/tasks/",
         "/_authenticated/users/"
       ]
@@ -898,6 +928,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/help-center/": {
       "filePath": "_authenticated/help-center/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/live-events/": {
+      "filePath": "_authenticated/live-events/index.lazy.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/settings/": {

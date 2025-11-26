@@ -349,6 +349,160 @@ const getActivityRewards = async ({ courseId }: { courseId: string }) => {
   }
 }
 
+// Live Events CRUD functions
+const getLiveEvents = async () => {
+  try {
+    const response = await strapi.get('/live-events?populate=*')
+    return response.data.data
+  } catch (error) {
+    console.log('Live Events fetch Error', error)
+    throw error
+  }
+}
+
+const getLiveEvent = async ({ id }: { id: string }) => {
+  try {
+    const response = await strapi.get(`/live-events/${id}?populate=*`)
+    return response.data.data
+  } catch (error) {
+    console.log('Live Event fetch Error', error)
+    throw error
+  }
+}
+
+const createLiveEvent = async (data: {
+  title: string
+  winners_rewards?: number[]
+  participation_rewards?: number[]
+  winners?: number[]
+  participants?: number[]
+  winners_rewarded?: boolean
+  participations_rewarded?: boolean
+  live?: number
+}) => {
+  try {
+    const response = await strapi.post('/live-events', { data })
+    toast({
+      title: 'Success',
+      description: 'Live event created successfully',
+    })
+    return response.data.data
+  } catch (error) {
+    console.log('Live Event create Error', error)
+    toast({
+      title: 'Error',
+      description: 'Failed to create live event',
+      variant: 'destructive',
+    })
+    throw error
+  }
+}
+
+const updateLiveEvent = async ({
+  id,
+  data,
+}: {
+  id: string
+  data: {
+    title?: string
+    winners_rewards?: number[]
+    participation_rewards?: number[]
+    winners?: number[]
+    participants?: number[]
+    winners_rewarded?: boolean
+    participations_rewarded?: boolean
+    live?: number
+  }
+}) => {
+  try {
+    const response = await strapi.put(`/live-events/${id}`, { data })
+    toast({
+      title: 'Success',
+      description: 'Live event updated successfully',
+    })
+    return response.data.data
+  } catch (error) {
+    console.log('Live Event update Error', error)
+    toast({
+      title: 'Error',
+      description: 'Failed to update live event',
+      variant: 'destructive',
+    })
+    throw error
+  }
+}
+
+const deleteLiveEvent = async ({ id }: { id: string }) => {
+  try {
+    await strapi.delete(`/live-events/${id}`)
+    toast({
+      title: 'Success',
+      description: 'Live event deleted successfully',
+    })
+  } catch (error) {
+    console.log('Live Event delete Error', error)
+    toast({
+      title: 'Error',
+      description: 'Failed to delete live event',
+      variant: 'destructive',
+    })
+    throw error
+  }
+}
+
+const getLives = async () => {
+  try {
+    const response = await strapi.get('/lives?populate=*')
+    return response.data.data
+  } catch (error) {
+    console.log('Lives fetch Error', error)
+    throw error
+  }
+}
+
+const getRewards = async () => {
+  try {
+    const response = await strapi.get('/rewards?populate=*')
+    return response.data.data
+  } catch (error) {
+    console.log('Rewards fetch Error', error)
+    throw error
+  }
+}
+
+const getRewardById = async ({ id }: { id: string }) => {
+  try {
+    const response = await strapi.get(`/rewards/${id}?populate=*`)
+    return response.data.data
+  } catch (error) {
+    console.log('Reward fetch Error', error)
+    throw error
+  }
+}
+
+const getUsers = async () => {
+  try {
+    const response = await strapi.get('/users?populate=*')
+    return response.data.data
+  } catch (error) {
+    console.log('Users fetch Error', error)
+    throw error
+  }
+}
+
+
+const getLiveParticipants = async ({ liveId }: { liveId: string }) => {
+  try {
+    const response = await strapi.get(
+      `/purchases?filters[content_id][$eq]=${liveId}&filters[type][$eq]=live&populate=*`
+    )
+    return response.data.data
+  } catch (error) {
+    console.log('Live participants fetch Error', error)
+    throw error
+  }
+}
+
 export {
   getThemes,
   getDjQuestions,
@@ -363,4 +517,14 @@ export {
   activityUpdate,
   getChallengeRewards,
   getActivityRewards,
+  getLiveEvents,
+  getLiveEvent,
+  createLiveEvent,
+  updateLiveEvent,
+  deleteLiveEvent,
+  getLives,
+  getRewards,
+  getRewardById,
+  getUsers,
+  getLiveParticipants,
 }

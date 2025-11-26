@@ -21,6 +21,7 @@ import {
   IconChessFilled,
   IconActivity,
   IconClipboardList,
+  IconVideo,
 } from '@tabler/icons-react'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -91,6 +92,11 @@ export const sidebarData: SidebarData = {
           title: 'Daily Quiz',
           url: '/daily-quiz',
           icon: IconClipboardList,
+        },
+        {
+          title: 'Live Events',
+          url: '/live-events',
+          icon: IconVideo,
         },
       ],
     },
