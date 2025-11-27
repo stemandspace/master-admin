@@ -19,6 +19,16 @@ export const config = {
     name: import.meta.env.VITE_ADMIN_NAME || 'Admin',
   },
 
+  // ZeptoMail configuration
+  zeptomail: {
+    apiKey: import.meta.env.VITE_ZEPTOMAIL_API_KEY || '',
+    baseURL: 'https://api.zeptomail.in/v1.1',
+    from: {
+      address: import.meta.env.VITE_ZEPTOMAIL_FROM_ADDRESS || 'noreply@spacetopia.in',
+      name: import.meta.env.VITE_ZEPTOMAIL_FROM_NAME || 'noreply',
+    },
+  },
+
   // Feature flags
   features: {
     enableAdminMode: true,

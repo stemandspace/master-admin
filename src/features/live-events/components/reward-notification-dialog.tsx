@@ -2,14 +2,13 @@
 
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { WINNER_TEMPLATE_ID, APPROVED_TEMPLATE_ID } from '@/lib/templateIds'
 import {
-  getUsers,
   getLiveParticipants,
   updateLiveEvent,
   getRewardById,
 } from '@/utils/fetcher-functions'
 import strapi from '@/utils/strapi'
+import { sendWinnerEmails, sendParticipantEmails } from '@/utils/zeptomail'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,17 +34,14 @@ export function RewardNotificationDialog({
   onOpenChange,
 }: Props) {
   const queryClient = useQueryClient()
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [isProcessingWinners, setIsProcessingWinners] = useState(false)
+  const [isProcessingParticipants, setIsProcessingParticipants] =
+    useState(false)
 
   const liveId =
     currentRow?.live && typeof currentRow.live === 'object'
       ? currentRow.live.id?.toString() || ''
       : currentRow?.live?.toString() || ''
-
-  const { data: users } = useQuery({
-    queryKey: ['users'],
-    queryFn: async () => await getUsers(),
-  })
 
   const { data: participants } = useQuery({
     queryKey: ['live-participants', liveId],
@@ -93,22 +89,53 @@ export function RewardNotificationDialog({
   })
 
   const getWinnerUsers = () => {
-    if (!currentRow?.winners || !users) return []
+    if (!currentRow?.winners) return []
     return currentRow.winners
-      .map((w: any) => {
-        const winnerId =
-          typeof w === 'object' && w !== null ? w.id?.toString() : w?.toString()
-        const user = users.find((u: any) => u.id?.toString() === winnerId)
-        return user
-          ? {
-              id: user.id?.toString(),
-              email: user.email || 'N/A',
-              name:
-                `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
-                user.username ||
-                'N/A',
-            }
-          : null
+      .map((winner: any) => {
+        // Handle both object and string/ID formats
+        const winnerObj =
+          typeof winner === 'object' && winner !== null ? winner : null
+
+        if (!winnerObj) {
+          return {
+            id: String(winner),
+            email: 'N/A',
+            name: 'N/A',
+          }
+        }
+
+        // Extract data directly from winner object
+        const id =
+          winnerObj.id?.toString() ||
+          winnerObj.user?.id?.toString() ||
+          winnerObj.userId?.toString() ||
+          'N/A'
+
+        const email =
+          winnerObj.email ||
+          winnerObj.user?.email ||
+          winnerObj.userEmail ||
+          'N/A'
+
+        const name =
+          winnerObj.name ||
+          winnerObj.userName ||
+          winnerObj.user?.name ||
+          (winnerObj.firstName || winnerObj.lastName
+            ? `${winnerObj.firstName || ''} ${winnerObj.lastName || ''}`.trim()
+            : null) ||
+          (winnerObj.user?.firstName || winnerObj.user?.lastName
+            ? `${winnerObj.user.firstName || ''} ${winnerObj.user.lastName || ''}`.trim()
+            : null) ||
+          winnerObj.username ||
+          winnerObj.user?.username ||
+          'N/A'
+
+        return {
+          id,
+          email,
+          name,
+        }
       })
       .filter((w: any) => w !== null)
   }
@@ -144,48 +171,10 @@ export function RewardNotificationDialog({
     )
   }
 
-  // Check if both winners and participants are already rewarded
-  const winnersRewarded = currentRow?.winners_rewarded || false
-  const participationsRewarded = currentRow?.participations_rewarded || false
-  const bothRewarded = winnersRewarded && participationsRewarded
-
-  const sendNotifications = async (
-    userIds: string[],
-    templateId: number,
-    eventTitle: string
-  ) => {
-    await Promise.all(
-      userIds.map(async (userId) => {
-        const user = users?.find((u: any) => u.id?.toString() === userId)
-        const userName =
-          user && `${user.firstName || ''} ${user.lastName || ''}`.trim()
-            ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-            : user?.username || 'User'
-        const userEmail = user?.email || ''
-
-        await strapi.post('/notificationxes', {
-          mail_template: templateId,
-          channel: 'mail',
-          user: Number(userId),
-          variables: {
-            variables: {
-              challenge_link: 'challenge_link_value',
-              challenge_name: eventTitle,
-              name: userName,
-            },
-            name: userName,
-            email: userEmail,
-          },
-        })
-      })
-    )
-  }
-
-  const onSubmit = async () => {
+  const handleSendWinnersRewards = async () => {
     if (!currentRow) return
 
-    setIsProcessing(true)
-    const eventTitle = currentRow.title || 'Live Event'
+    setIsProcessingWinners(true)
 
     try {
       const winnerIds =
@@ -193,71 +182,293 @@ export function RewardNotificationDialog({
           typeof w === 'object' && w !== null ? w.id?.toString() : w?.toString()
         ) || []
 
-      const participantIds = getParticipantUsers().map((p: any) => p.id)
-
-      let winnersRewardedUpdated = winnersRewarded
-      let participationsRewardedUpdated = participationsRewarded
-
-      // Send winners rewards if configured and not already rewarded
-      if (
-        !winnersRewarded &&
-        winnerRewardIds.length > 0 &&
-        winnerIds.length > 0
-      ) {
-        const rewardIds = winnerRewardIds.map((id) => Number(id))
-        await sendRewards(winnerIds, rewardIds)
-        await sendNotifications(winnerIds, WINNER_TEMPLATE_ID, eventTitle)
-        winnersRewardedUpdated = true
-      }
-
-      // Send participation rewards if configured and not already rewarded
-      if (
-        !participationsRewarded &&
-        participationRewardIds.length > 0 &&
-        participantIds.length > 0
-      ) {
-        const rewardIds = participationRewardIds.map((id) => Number(id))
-        await sendRewards(participantIds, rewardIds)
-        await sendNotifications(
-          participantIds,
-          APPROVED_TEMPLATE_ID,
-          eventTitle
-        )
-        participationsRewardedUpdated = true
-      }
-
-      // Update the boolean flags if they changed
-      if (
-        winnersRewardedUpdated !== winnersRewarded ||
-        participationsRewardedUpdated !== participationsRewarded
-      ) {
-        await updateLiveEvent({
-          id: currentRow.id,
-          data: {
-            winners_rewarded: winnersRewardedUpdated,
-            participations_rewarded: participationsRewardedUpdated,
-          },
+      if (winnerRewardIds.length === 0 || winnerIds.length === 0) {
+        toast({
+          title: 'Error',
+          description: 'No winners or rewards configured',
+          variant: 'destructive',
         })
+        return
       }
+
+      const rewardIds = winnerRewardIds.map((id) => Number(id))
+      await sendRewards(winnerIds, rewardIds)
+
+      // Send ZeptoMail emails to winners
+      let emailStatus = { sent: false, count: 0, error: null as string | null }
+      try {
+        if (!currentRow.winners || currentRow.winners.length === 0) {
+          console.warn('No winners found in currentRow')
+          emailStatus.error = 'No winners found'
+        } else {
+          // Get winner users with email addresses directly from currentRow.winners
+          const winnerUsersForEmail = currentRow.winners
+            .map((winner: any) => {
+              // Handle both object and string/ID formats
+              const winnerObj =
+                typeof winner === 'object' && winner !== null ? winner : null
+
+              if (!winnerObj) {
+                console.warn('Invalid winner format:', winner)
+                return null
+              }
+
+              // Extract email from winner object (could be winner.email, winner.user?.email, etc.)
+              const email =
+                winnerObj.email ||
+                winnerObj.user?.email ||
+                winnerObj.userEmail ||
+                null
+
+              // Extract name from winner object
+              const name =
+                winnerObj.name ||
+                winnerObj.userName ||
+                winnerObj.user?.name ||
+                (winnerObj.firstName || winnerObj.lastName
+                  ? `${winnerObj.firstName || ''} ${winnerObj.lastName || ''}`.trim()
+                  : null) ||
+                (winnerObj.user?.firstName || winnerObj.user?.lastName
+                  ? `${winnerObj.user.firstName || ''} ${winnerObj.user.lastName || ''}`.trim()
+                  : null) ||
+                winnerObj.username ||
+                winnerObj.user?.username ||
+                'User'
+
+              // Extract ID
+              const id =
+                winnerObj.id?.toString() ||
+                winnerObj.user?.id?.toString() ||
+                winnerObj.userId?.toString() ||
+                null
+
+              if (!email || email === 'N/A') {
+                console.warn(`No valid email for winner:`, winnerObj)
+                return null
+              }
+
+              if (!id) {
+                console.warn(`No valid ID for winner:`, winnerObj)
+                return null
+              }
+
+              return {
+                id,
+                email,
+                name: name || 'User',
+              }
+            })
+            .filter(
+              (user): user is { id: string; email: string; name: string } =>
+                user !== null
+            )
+
+          if (winnerUsersForEmail.length > 0) {
+            console.log('Sending ZeptoMail to winners:', winnerUsersForEmail)
+            await sendWinnerEmails(winnerUsersForEmail)
+            console.log('ZeptoMail sent successfully to winners')
+            emailStatus.sent = true
+            emailStatus.count = winnerUsersForEmail.length
+          } else {
+            console.warn('No valid email addresses found for winners')
+            emailStatus.error = 'No valid email addresses found'
+          }
+        }
+      } catch (emailError) {
+        console.error('Error sending winner emails:', emailError)
+        emailStatus.error =
+          emailError instanceof Error ? emailError.message : 'Unknown error'
+        // Don't fail the whole operation if email fails, just log it
+      }
+
+      // Update winners_rewarded to true after successful reward distribution
+      await updateLiveEvent({
+        id: currentRow.id,
+        data: {
+          winners_rewarded: true,
+        },
+      })
+
+      // Show success message with email status
+      const successMessage = emailStatus.sent
+        ? `Winners rewards and emails sent successfully to ${emailStatus.count} winner(s)`
+        : emailStatus.error
+          ? `Winners rewards sent successfully. Email notification skipped: ${emailStatus.error}`
+          : 'Winners rewards sent successfully'
 
       toast({
         title: 'Success',
-        description: 'Rewards and notifications sent successfully',
+        description: successMessage,
       })
 
       queryClient.invalidateQueries({ queryKey: ['live-events'] })
-      onOpenChange(false)
     } catch (error) {
-      console.error('Error sending rewards/notifications:', error)
+      console.error('Error sending winners rewards:', error)
+
+      // Update winners_rewarded to false if there's an API error
+      try {
+        await updateLiveEvent({
+          id: currentRow.id,
+          data: {
+            winners_rewarded: false,
+          },
+        })
+        queryClient.invalidateQueries({ queryKey: ['live-events'] })
+      } catch (updateError) {
+        console.error('Error updating winners_rewarded flag:', updateError)
+      }
+
       toast({
         title: 'Error',
-        description: 'Failed to send rewards and notifications',
+        description: 'Failed to send winners rewards',
         variant: 'destructive',
       })
     } finally {
-      setIsProcessing(false)
+      setIsProcessingWinners(false)
     }
   }
+
+  const handleSendParticipantsRewards = async () => {
+    if (!currentRow) return
+
+    setIsProcessingParticipants(true)
+
+    try {
+      const participantIds = getParticipantUsers().map((p: any) => p.id)
+
+      if (participationRewardIds.length === 0 || participantIds.length === 0) {
+        toast({
+          title: 'Error',
+          description: 'No participants or rewards configured',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      const rewardIds = participationRewardIds.map((id) => Number(id))
+      await sendRewards(participantIds, rewardIds)
+
+      // Send ZeptoMail emails to participants
+      let emailStatus = { sent: false, count: 0, error: null as string | null }
+      try {
+        if (!participants || participants.length === 0) {
+          console.warn(
+            'Participants data not loaded yet, skipping email sending'
+          )
+          emailStatus.error = 'Participants data not loaded'
+        } else {
+          // Get participant users with email addresses for ZeptoMail
+          const participantUsersForEmail = participantIds
+            .map((participantId: string) => {
+              const participant = participants.find(
+                (p: any) =>
+                  (p.user?.id?.toString() || p.id?.toString()) === participantId
+              )
+              if (!participant) {
+                console.warn(`Participant not found for ID: ${participantId}`)
+                return null
+              }
+
+              const user = participant.user || participant
+              const userName =
+                user.firstname || user.lastname
+                  ? `${user.firstname || ''} ${user.lastname || ''}`.trim()
+                  : user.username || 'User'
+
+              if (!user.email || user.email === 'N/A') {
+                console.warn(
+                  `No valid email for participant ID: ${participantId}`
+                )
+                return null
+              }
+
+              return {
+                id: participantId,
+                email: user.email,
+                name: userName,
+              }
+            })
+            .filter(
+              (
+                user: { id: string; email: string; name: string } | null
+              ): user is { id: string; email: string; name: string } =>
+                user !== null
+            )
+
+          if (participantUsersForEmail.length > 0) {
+            console.log(
+              'Sending ZeptoMail to participants:',
+              participantUsersForEmail
+            )
+            await sendParticipantEmails(participantUsersForEmail)
+            console.log('ZeptoMail sent successfully to participants')
+            emailStatus.sent = true
+            emailStatus.count = participantUsersForEmail.length
+          } else {
+            console.warn('No valid email addresses found for participants')
+            emailStatus.error = 'No valid email addresses found'
+          }
+        }
+      } catch (emailError) {
+        console.error('Error sending participant emails:', emailError)
+        emailStatus.error =
+          emailError instanceof Error ? emailError.message : 'Unknown error'
+        // Don't fail the whole operation if email fails, just log it
+      }
+
+      // Update participations_rewarded to true after successful reward distribution
+      await updateLiveEvent({
+        id: currentRow.id,
+        data: {
+          participations_rewarded: true,
+        },
+      })
+
+      // Show success message with email status
+      const successMessage = emailStatus.sent
+        ? `Participants rewards and emails sent successfully to ${emailStatus.count} participant(s)`
+        : emailStatus.error
+          ? `Participants rewards sent successfully. Email notification skipped: ${emailStatus.error}`
+          : 'Participants rewards sent successfully'
+
+      toast({
+        title: 'Success',
+        description: successMessage,
+      })
+
+      queryClient.invalidateQueries({ queryKey: ['live-events'] })
+    } catch (error) {
+      console.error('Error sending participants rewards:', error)
+
+      // Update participations_rewarded to false if there's an API error
+      try {
+        await updateLiveEvent({
+          id: currentRow.id,
+          data: {
+            participations_rewarded: false,
+          },
+        })
+        queryClient.invalidateQueries({ queryKey: ['live-events'] })
+      } catch (updateError) {
+        console.error(
+          'Error updating participations_rewarded flag:',
+          updateError
+        )
+      }
+
+      toast({
+        title: 'Error',
+        description: 'Failed to send participants rewards',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsProcessingParticipants(false)
+    }
+  }
+
+  // Check if winners and participants are already rewarded
+  const winnersRewarded = currentRow?.winners_rewarded || false
+  const participationsRewarded = currentRow?.participations_rewarded || false
 
   const winnerUsers = getWinnerUsers()
   const participantUsers = getParticipantUsers()
@@ -277,6 +488,7 @@ export function RewardNotificationDialog({
             live event.
           </DialogDescription>
         </DialogHeader>
+
         <ScrollArea className='-mr-4 h-[32rem] w-full py-1 pr-4'>
           <div className='space-y-6 p-0.5'>
             {/* Winners Section */}
@@ -369,6 +581,27 @@ export function RewardNotificationDialog({
                         Loading reward details...
                       </p>
                     )}
+
+                    <div className='mt-4'>
+                      <Button
+                        type='button'
+                        onClick={handleSendWinnersRewards}
+                        disabled={
+                          isProcessingWinners ||
+                          winnersRewarded ||
+                          !currentRow?.winners ||
+                          currentRow.winners.length === 0 ||
+                          winnerRewardIds.length === 0
+                        }
+                        className='w-full'
+                      >
+                        {isProcessingWinners
+                          ? 'Sending Rewards...'
+                          : winnersRewarded
+                            ? 'Winners Already Rewarded'
+                            : 'Send Rewards to Winners'}
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <p className='mt-4 text-sm text-muted-foreground'>
@@ -455,6 +688,26 @@ export function RewardNotificationDialog({
                         Loading reward details...
                       </p>
                     )}
+                    <div className='mt-4'>
+                      <Button
+                        type='button'
+                        onClick={handleSendParticipantsRewards}
+                        disabled={
+                          isProcessingParticipants ||
+                          participationsRewarded ||
+                          !participants ||
+                          participants.length === 0 ||
+                          participationRewardIds.length === 0
+                        }
+                        className='w-full'
+                      >
+                        {isProcessingParticipants
+                          ? 'Sending Rewards...'
+                          : participationsRewarded
+                            ? 'Participants Already Rewarded'
+                            : 'Send Rewards to Participants'}
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <p className='mt-4 text-sm text-muted-foreground'>
@@ -466,28 +719,13 @@ export function RewardNotificationDialog({
           </div>
         </ScrollArea>
         <DialogFooter>
-          {bothRewarded ? (
-            <div className='flex w-full flex-col items-center gap-2'>
-              <p className='text-sm text-muted-foreground'>
-                Both winners and participants have already been rewarded.
-              </p>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={() => onOpenChange(false)}
-              >
-                Close
-              </Button>
-            </div>
-          ) : (
-            <Button
-              type='button'
-              onClick={onSubmit}
-              disabled={isProcessing || bothRewarded}
-            >
-              {isProcessing ? 'Sending...' : 'Send Rewards & Notifications'}
-            </Button>
-          )}
+          <Button
+            type='button'
+            variant='outline'
+            onClick={() => onOpenChange(false)}
+          >
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
