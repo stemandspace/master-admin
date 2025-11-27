@@ -17,14 +17,14 @@ interface SendBatchEmailParams {
 }
 
 /**
- * Send batch emails via ZeptoMail API
+ * Send batch emails via server endpoint (which forwards to ZeptoMail)
  */
 export const sendZeptoMailBatch = async ({
     mailTemplateKey,
     recipients,
 }: SendBatchEmailParams) => {
-    if (!config.zeptomail.apiKey || config.zeptomail.apiKey.trim() === '') {
-        const errorMsg = 'ZeptoMail API key is not configured. Please set VITE_ZEPTOMAIL_API_KEY environment variable.'
+    if (!config.zeptomail.serverURL || config.zeptomail.serverURL.trim() === '') {
+        const errorMsg = 'Email server URL is not configured. Please set VITE_EMAIL_SERVER_URL environment variable.'
         console.error(errorMsg)
         throw new Error(errorMsg)
     }
@@ -33,16 +33,20 @@ export const sendZeptoMailBatch = async ({
         throw new Error('No recipients provided')
     }
 
-    console.log('ZeptoMail request:', {
-        baseURL: config.zeptomail.baseURL,
+    console.log('Sending ZeptoMail batch request via server:', {
+        serverURL: config.zeptomail.serverURL,
         mailTemplateKey,
         recipientsCount: recipients.length,
         from: config.zeptomail.from,
     })
 
     try {
+        const endpoint = config.zeptomail.serverURL
+            ? `${config.zeptomail.serverURL}/api/email/send-zepto`
+            : '/api/email/send-zepto'
+
         const response = await axios.post(
-            `${config.zeptomail.baseURL}/email/template/batch`,
+            endpoint,
             {
                 mail_template_key: mailTemplateKey,
                 from: {
@@ -55,15 +59,14 @@ export const sendZeptoMailBatch = async ({
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
-                    Authorization: `Zoho-enczapikey ${config.zeptomail.apiKey}`,
                 },
             }
         )
 
-        console.log('ZeptoMail API response:', response.data)
+        console.log('Email server response:', response.data)
         return response.data
     } catch (error) {
-        console.error('ZeptoMail API error:', error)
+        console.error('Email server error:', error)
         if (axios.isAxiosError(error)) {
             const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message
             const errorDetails = {
@@ -72,8 +75,8 @@ export const sendZeptoMailBatch = async ({
                 data: error.response?.data,
                 message: errorMessage,
             }
-            console.error('ZeptoMail error details:', errorDetails)
-            throw new Error(`ZeptoMail API error: ${errorMessage}`)
+            console.error('Email server error details:', errorDetails)
+            throw new Error(`Email server error: ${errorMessage}`)
         }
         throw error
     }
@@ -113,7 +116,7 @@ export const sendWinnerEmails = async (
 }
 
 /**
- * Send single email via ZeptoMail API (for participants)
+ * Send single email via server endpoint (which forwards to ZeptoMail)
  */
 const sendZeptoMailSingle = async ({
     mailTemplateKey,
@@ -124,22 +127,26 @@ const sendZeptoMailSingle = async ({
     recipient: { email: string; name: string }
     mergeInfo?: Record<string, any>
 }) => {
-    if (!config.zeptomail.apiKey || config.zeptomail.apiKey.trim() === '') {
-        const errorMsg = 'ZeptoMail API key is not configured. Please set VITE_ZEPTOMAIL_API_KEY environment variable.'
+    if (!config.zeptomail.serverURL || config.zeptomail.serverURL.trim() === '') {
+        const errorMsg = 'Email server URL is not configured. Please set VITE_EMAIL_SERVER_URL environment variable.'
         console.error(errorMsg)
         throw new Error(errorMsg)
     }
 
-    console.log('ZeptoMail single email request:', {
-        baseURL: config.zeptomail.baseURL,
+    console.log('Sending ZeptoMail single email request via server:', {
+        serverURL: config.zeptomail.serverURL,
         mailTemplateKey,
         recipient,
         from: config.zeptomail.from,
     })
 
     try {
+        const endpoint = config.zeptomail.serverURL
+            ? `${config.zeptomail.serverURL}/api/email/send-zepto`
+            : '/api/email/send-zepto'
+
         const response = await axios.post(
-            `${config.zeptomail.baseURL}/email/template`,
+            endpoint,
             {
                 mail_template_key: mailTemplateKey,
                 from: {
@@ -160,15 +167,14 @@ const sendZeptoMailSingle = async ({
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
-                    Authorization: `Zoho-enczapikey ${config.zeptomail.apiKey}`,
                 },
             }
         )
 
-        console.log('ZeptoMail API response:', response.data)
+        console.log('Email server response:', response.data)
         return response.data
     } catch (error) {
-        console.error('ZeptoMail API error:', error)
+        console.error('Email server error:', error)
         if (axios.isAxiosError(error)) {
             const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message
             const errorDetails = {
@@ -177,8 +183,8 @@ const sendZeptoMailSingle = async ({
                 data: error.response?.data,
                 message: errorMessage,
             }
-            console.error('ZeptoMail error details:', errorDetails)
-            throw new Error(`ZeptoMail API error: ${errorMessage}`)
+            console.error('Email server error details:', errorDetails)
+            throw new Error(`Email server error: ${errorMessage}`)
         }
         throw error
     }

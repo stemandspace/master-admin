@@ -21,8 +21,10 @@ export const config = {
 
   // ZeptoMail configuration
   zeptomail: {
-    apiKey: import.meta.env.VITE_ZEPTOMAIL_API_KEY || '',
-    baseURL: 'https://api.zeptomail.in/v1.1',
+    // Use relative path in dev (via Vite proxy) or full URL in production
+    serverURL:
+      import.meta.env.VITE_EMAIL_SERVER_URL ||
+      (import.meta.env.DEV ? '' : 'http://localhost:3000'),
     from: {
       address: import.meta.env.VITE_ZEPTOMAIL_FROM_ADDRESS || 'noreply@spacetopia.in',
       name: import.meta.env.VITE_ZEPTOMAIL_FROM_NAME || 'noreply',
