@@ -1,6 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { LiveEvent } from '../data/schema'
 import { DataTableColumnHeader } from './data-table-column-header'
