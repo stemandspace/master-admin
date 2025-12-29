@@ -349,6 +349,139 @@ const getActivityRewards = async ({ courseId }: { courseId: string }) => {
   }
 }
 
+// Submissions CRUD functions
+const getSubmissions = async ({
+  content_type,
+  content_id,
+}: {
+  content_type?: string
+  content_id?: string
+}) => {
+  try {
+    let url = '/submissions?populate=*'
+    const filters: string[] = []
+
+    if (content_type) {
+      filters.push(`filters[content_type][$eq]=${content_type}`)
+    }
+    if (content_id) {
+      filters.push(`filters[content_id][$eq]=${content_id}`)
+    }
+
+    if (filters.length > 0) {
+      url += `&${filters.join('&')}`
+    }
+
+    const response = await strapi.get(url)
+    return response.data.data
+  } catch (error) {
+    console.log('Submissions fetch Error', error)
+    throw error
+  }
+}
+
+const getSubmission = async ({ id }: { id: string }) => {
+  try {
+    const response = await strapi.get(`/submissions/${id}?populate=*`)
+    return response.data.data
+  } catch (error) {
+    console.log('Submission fetch Error', error)
+    throw error
+  }
+}
+
+const updateSubmissionStatus = async ({
+  id,
+  status,
+  submissionData,
+}: {
+  id: string
+  status: 'pending' | 'selected' | 'rejected'
+  submissionData?: {
+    content_type?: string
+    content_id?: string
+    user?: {
+      id: string
+      email: string
+      firstname?: string
+      lastname?: string
+      username?: string
+    }
+  }
+}) => {
+  try {
+    const response = await strapi.put(`/submissions/${id}`, {
+      status,
+    })
+
+    // Process rewards if status is 'selected' and content_type is 'diy'
+    if (status === 'selected' && submissionData?.content_type === 'diy' && submissionData?.content_id) {
+      try {
+        // Find live event by content_id (live event's live.id should match content_id)
+        const liveEventsResponse = await strapi.get(
+          `/live-events?filters[live][id][$eq]=${submissionData.content_id}&populate[live]=*&populate[submission_rewards]=*`
+        )
+        
+        const liveEvents = liveEventsResponse.data.data
+        if (liveEvents && liveEvents.length > 0) {
+          const liveEvent = liveEvents[0]
+          
+          // Get submission_rewards from live event
+          if (liveEvent.submission_rewards && liveEvent.submission_rewards.length > 0) {
+            const rewardIds = liveEvent.submission_rewards.map((r: any) => r.id || r)
+            
+            if (rewardIds.length > 0 && submissionData.user?.id) {
+              // Process the reward
+              await strapi.post(`/v1/reward`, {
+                userId: Number(submissionData.user.id),
+                rewardIds,
+              })
+
+              // Send notification
+              const userName = submissionData.user.firstname && submissionData.user.lastname
+                ? `${submissionData.user.firstname} ${submissionData.user.lastname}`
+                : submissionData.user.username || 'User'
+
+              await strapi.post('/notificationxes', {
+                mail_template: APPROVED_TEMPLATE_ID,
+                channel: 'mail',
+                user: Number(submissionData.user.id),
+                variables: {
+                  variables: {
+                    challenge_link: 'challenge_link_value',
+                    challenge_name: liveEvent.title || 'Live Event',
+                    name: userName,
+                    product_name: 'product_name_value',
+                  },
+                  name: userName,
+                  email: submissionData.user.email,
+                },
+              })
+            }
+          }
+        }
+      } catch (rewardError) {
+        console.log('Reward processing error:', rewardError)
+        // Don't fail the whole operation if reward processing fails
+      }
+    }
+
+    toast({
+      title: 'Success',
+      description: `Submission ${status === 'selected' ? 'confirmed' : status} successfully`,
+    })
+    return response.data.data
+  } catch (error) {
+    console.log('Submission update Error', error)
+    toast({
+      title: 'Error',
+      description: 'Failed to update submission',
+      variant: 'destructive',
+    })
+    throw error
+  }
+}
+
 // Live Events CRUD functions
 const getLiveEvents = async () => {
   try {
@@ -517,6 +650,9 @@ export {
   activityUpdate,
   getChallengeRewards,
   getActivityRewards,
+  getSubmissions,
+  getSubmission,
+  updateSubmissionStatus,
   getLiveEvents,
   getLiveEvent,
   createLiveEvent,

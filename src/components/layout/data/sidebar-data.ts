@@ -89,6 +89,11 @@ export const sidebarData: SidebarData = {
           icon: IconActivity,
         },
         {
+          title: 'Submissions',
+          url: '/submissions',
+          icon: IconActivity,
+        },
+        {
           title: 'Daily Quiz',
           url: '/daily-quiz',
           icon: IconClipboardList,

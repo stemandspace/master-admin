@@ -40,6 +40,9 @@ const AuthenticatedUsersIndexLazyImport = createFileRoute(
 const AuthenticatedTasksIndexLazyImport = createFileRoute(
   '/_authenticated/tasks/',
 )()
+const AuthenticatedSubmissionsIndexLazyImport = createFileRoute(
+  '/_authenticated/submissions/',
+)()
 const AuthenticatedSettingsIndexLazyImport = createFileRoute(
   '/_authenticated/settings/',
 )()
@@ -63,6 +66,9 @@ const AuthenticatedAppsIndexLazyImport = createFileRoute(
 )()
 const AuthenticatedActivityRequestIndexLazyImport = createFileRoute(
   '/_authenticated/activity-request/',
+)()
+const AuthenticatedSubmissionsSubmissionIdLazyImport = createFileRoute(
+  '/_authenticated/submissions/$submissionId',
 )()
 const AuthenticatedSettingsNotificationsLazyImport = createFileRoute(
   '/_authenticated/settings/notifications',
@@ -201,6 +207,17 @@ const AuthenticatedTasksIndexLazyRoute =
     import('./routes/_authenticated/tasks/index.lazy').then((d) => d.Route),
   )
 
+const AuthenticatedSubmissionsIndexLazyRoute =
+  AuthenticatedSubmissionsIndexLazyImport.update({
+    id: '/submissions/',
+    path: '/submissions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/submissions/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedSettingsIndexLazyRoute =
   AuthenticatedSettingsIndexLazyImport.update({
     id: '/',
@@ -280,6 +297,17 @@ const AuthenticatedActivityRequestIndexLazyRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any).lazy(() =>
     import('./routes/_authenticated/activity-request/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedSubmissionsSubmissionIdLazyRoute =
+  AuthenticatedSubmissionsSubmissionIdLazyImport.update({
+    id: '/submissions/$submissionId',
+    path: '/submissions/$submissionId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/submissions/$submissionId.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -458,6 +486,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsNotificationsLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
+    '/_authenticated/submissions/$submissionId': {
+      id: '/_authenticated/submissions/$submissionId'
+      path: '/submissions/$submissionId'
+      fullPath: '/submissions/$submissionId'
+      preLoaderRoute: typeof AuthenticatedSubmissionsSubmissionIdLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/activity-request/': {
       id: '/_authenticated/activity-request/'
       path: '/activity-request'
@@ -514,6 +549,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsIndexLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
+    '/_authenticated/submissions/': {
+      id: '/_authenticated/submissions/'
+      path: '/submissions'
+      fullPath: '/submissions'
+      preLoaderRoute: typeof AuthenticatedSubmissionsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/tasks/': {
       id: '/_authenticated/tasks/'
       path: '/tasks'
@@ -562,6 +604,7 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedSubmissionsSubmissionIdLazyRoute: typeof AuthenticatedSubmissionsSubmissionIdLazyRoute
   AuthenticatedActivityRequestIndexLazyRoute: typeof AuthenticatedActivityRequestIndexLazyRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedChallengesIndexLazyRoute: typeof AuthenticatedChallengesIndexLazyRoute
@@ -569,6 +612,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDailyQuizIndexLazyRoute: typeof AuthenticatedDailyQuizIndexLazyRoute
   AuthenticatedHelpCenterIndexLazyRoute: typeof AuthenticatedHelpCenterIndexLazyRoute
   AuthenticatedLiveEventsIndexLazyRoute: typeof AuthenticatedLiveEventsIndexLazyRoute
+  AuthenticatedSubmissionsIndexLazyRoute: typeof AuthenticatedSubmissionsIndexLazyRoute
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
 }
@@ -577,6 +621,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedSubmissionsSubmissionIdLazyRoute:
+    AuthenticatedSubmissionsSubmissionIdLazyRoute,
   AuthenticatedActivityRequestIndexLazyRoute:
     AuthenticatedActivityRequestIndexLazyRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
@@ -585,6 +631,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDailyQuizIndexLazyRoute: AuthenticatedDailyQuizIndexLazyRoute,
   AuthenticatedHelpCenterIndexLazyRoute: AuthenticatedHelpCenterIndexLazyRoute,
   AuthenticatedLiveEventsIndexLazyRoute: AuthenticatedLiveEventsIndexLazyRoute,
+  AuthenticatedSubmissionsIndexLazyRoute:
+    AuthenticatedSubmissionsIndexLazyRoute,
   AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
 }
@@ -610,6 +658,7 @@ export interface FileRoutesByFullPath {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/submissions/$submissionId': typeof AuthenticatedSubmissionsSubmissionIdLazyRoute
   '/activity-request': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/challenges': typeof AuthenticatedChallengesIndexLazyRoute
@@ -618,6 +667,7 @@ export interface FileRoutesByFullPath {
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/live-events': typeof AuthenticatedLiveEventsIndexLazyRoute
   '/settings/': typeof AuthenticatedSettingsIndexLazyRoute
+  '/submissions': typeof AuthenticatedSubmissionsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
 }
@@ -638,6 +688,7 @@ export interface FileRoutesByTo {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/submissions/$submissionId': typeof AuthenticatedSubmissionsSubmissionIdLazyRoute
   '/activity-request': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/challenges': typeof AuthenticatedChallengesIndexLazyRoute
@@ -646,6 +697,7 @@ export interface FileRoutesByTo {
   '/help-center': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/live-events': typeof AuthenticatedLiveEventsIndexLazyRoute
   '/settings': typeof AuthenticatedSettingsIndexLazyRoute
+  '/submissions': typeof AuthenticatedSubmissionsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
 }
@@ -670,6 +722,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
+  '/_authenticated/submissions/$submissionId': typeof AuthenticatedSubmissionsSubmissionIdLazyRoute
   '/_authenticated/activity-request/': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/challenges/': typeof AuthenticatedChallengesIndexLazyRoute
@@ -678,6 +731,7 @@ export interface FileRoutesById {
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexLazyRoute
   '/_authenticated/live-events/': typeof AuthenticatedLiveEventsIndexLazyRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexLazyRoute
+  '/_authenticated/submissions/': typeof AuthenticatedSubmissionsIndexLazyRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
 }
@@ -702,6 +756,7 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/submissions/$submissionId'
     | '/activity-request'
     | '/apps'
     | '/challenges'
@@ -710,6 +765,7 @@ export interface FileRouteTypes {
     | '/help-center'
     | '/live-events'
     | '/settings/'
+    | '/submissions'
     | '/tasks'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
@@ -729,6 +785,7 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/submissions/$submissionId'
     | '/activity-request'
     | '/apps'
     | '/challenges'
@@ -737,6 +794,7 @@ export interface FileRouteTypes {
     | '/help-center'
     | '/live-events'
     | '/settings'
+    | '/submissions'
     | '/tasks'
     | '/users'
   id:
@@ -759,6 +817,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/submissions/$submissionId'
     | '/_authenticated/activity-request/'
     | '/_authenticated/apps/'
     | '/_authenticated/challenges/'
@@ -767,6 +826,7 @@ export interface FileRouteTypes {
     | '/_authenticated/help-center/'
     | '/_authenticated/live-events/'
     | '/_authenticated/settings/'
+    | '/_authenticated/submissions/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
   fileRoutesById: FileRoutesById
@@ -831,6 +891,7 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
+        "/_authenticated/submissions/$submissionId",
         "/_authenticated/activity-request/",
         "/_authenticated/apps/",
         "/_authenticated/challenges/",
@@ -838,6 +899,7 @@ export const routeTree = rootRoute
         "/_authenticated/daily-quiz/",
         "/_authenticated/help-center/",
         "/_authenticated/live-events/",
+        "/_authenticated/submissions/",
         "/_authenticated/tasks/",
         "/_authenticated/users/"
       ]
@@ -906,6 +968,10 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/settings/notifications.lazy.tsx",
       "parent": "/_authenticated/settings"
     },
+    "/_authenticated/submissions/$submissionId": {
+      "filePath": "_authenticated/submissions/$submissionId.lazy.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/activity-request/": {
       "filePath": "_authenticated/activity-request/index.lazy.tsx",
       "parent": "/_authenticated"
@@ -937,6 +1003,10 @@ export const routeTree = rootRoute
     "/_authenticated/settings/": {
       "filePath": "_authenticated/settings/index.lazy.tsx",
       "parent": "/_authenticated/settings"
+    },
+    "/_authenticated/submissions/": {
+      "filePath": "_authenticated/submissions/index.lazy.tsx",
+      "parent": "/_authenticated"
     },
     "/_authenticated/tasks/": {
       "filePath": "_authenticated/tasks/index.lazy.tsx",
