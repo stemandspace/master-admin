@@ -3,6 +3,7 @@ import { LiveEventActionDialog } from './live-event-action-dialog'
 import { LiveEventDeleteDialog } from './live-event-delete-dialog'
 import { RewardNotificationDialog } from './reward-notification-dialog'
 import { SelectWinnersDialog } from './select-winners-dialog'
+import { SendParticipantsEmailDialog } from './send-participants-email-dialog'
 
 export function LiveEventDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useLiveEvents()
@@ -45,6 +46,18 @@ export function LiveEventDialogs() {
             open={open === 'reward-notification'}
             onOpenChange={() => {
               setOpen('reward-notification')
+              setTimeout(() => {
+                setCurrentRow(null)
+              }, 500)
+            }}
+            currentRow={currentRow}
+          />
+
+          <SendParticipantsEmailDialog
+            key={`live-event-send-participants-email-${currentRow.id}`}
+            open={open === 'send-participants-email'}
+            onOpenChange={() => {
+              setOpen('send-participants-email')
               setTimeout(() => {
                 setCurrentRow(null)
               }, 500)

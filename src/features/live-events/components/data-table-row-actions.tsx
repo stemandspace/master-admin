@@ -1,6 +1,12 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
-import { IconEdit, IconTrash, IconTrophy, IconGift } from '@tabler/icons-react'
+import {
+  IconEdit,
+  IconTrash,
+  IconTrophy,
+  IconGift,
+  IconMail,
+} from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -63,6 +69,17 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             Reward & Notification
             <DropdownMenuShortcut>
               <IconGift size={16} />
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              setCurrentRow(row.original)
+              setOpen('send-participants-email')
+            }}
+          >
+            Send Email to Participants
+            <DropdownMenuShortcut>
+              <IconMail size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

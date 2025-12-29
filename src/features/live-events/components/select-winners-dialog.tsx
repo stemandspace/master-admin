@@ -141,9 +141,17 @@ export function SelectWinnersDialog({ currentRow, open, onOpenChange }: Props) {
             Select Winners from list of Content Purchasers
           </DialogTitle>
           <DialogDescription>
-            {participants && participants.length > 0
-              ? 'Select up to 3 winners from the participants list.'
-              : 'No Content Purchasers found for this live event.'}
+            {participants && participants.length > 0 ? (
+              <div className='flex items-center gap-2'>
+                <span>Select up to 3 winners from the participants list.</span>
+                <span className='font-medium text-foreground'>
+                  ({participants.length} Content Purchaser
+                  {participants.length !== 1 ? 's' : ''})
+                </span>
+              </div>
+            ) : (
+              'No Content Purchasers found for this live event.'
+            )}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -221,12 +229,29 @@ export function SelectWinnersDialog({ currentRow, open, onOpenChange }: Props) {
                         </div>
                       ) : (
                         <div className='space-y-3'>
-                          <Input
-                            placeholder='Search participants by name, email, or username...'
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className='w-full'
-                          />
+                          <div className='space-y-2'>
+                            <Input
+                              placeholder='Search participants by name, email, or username...'
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className='w-full'
+                            />
+                            <div className='flex items-center justify-between text-xs text-muted-foreground'>
+                              <span>
+                                Showing {filteredParticipants.length} of{' '}
+                                {participantList.length} entr
+                                {participantList.length !== 1 ? 'ies' : 'y'}
+                              </span>
+                              {searchQuery.trim() && (
+                                <span className='text-primary'>
+                                  {filteredParticipants.length ===
+                                  participantList.length
+                                    ? 'All results'
+                                    : 'Filtered'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                           <ScrollArea className='h-[300px] rounded-md border p-4'>
                             <div className='space-y-3'>
                               {filteredParticipants.length === 0 ? (

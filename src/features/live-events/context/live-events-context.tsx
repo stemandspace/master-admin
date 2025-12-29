@@ -8,6 +8,7 @@ type LiveEventsDialogType =
   | 'delete'
   | 'select-winners'
   | 'reward-notification'
+  | 'send-participants-email'
 
 interface LiveEventsContextType {
   open: LiveEventsDialogType | null
