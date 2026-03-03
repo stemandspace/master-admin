@@ -264,6 +264,17 @@ const getActivityRequest = async ({ id }: { id: string }) => {
   }
 }
 
+const getActivityRequestForDiy = async ({ id }: { id: string }) => {
+  try {
+    const response = await strapi.get(
+      `/activity-requests?filters[courseId][$eq]=${id}&populate=*`
+    )
+    return response.data.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const activityUpdate = async ({
   id,
   status,
@@ -421,15 +432,15 @@ const updateSubmissionStatus = async ({
         const liveEventsResponse = await strapi.get(
           `/live-events?filters[live][id][$eq]=${submissionData.content_id}&populate[live]=*&populate[submission_rewards]=*`
         )
-        
+
         const liveEvents = liveEventsResponse.data.data
         if (liveEvents && liveEvents.length > 0) {
           const liveEvent = liveEvents[0]
-          
+
           // Get submission_rewards from live event
           if (liveEvent.submission_rewards && liveEvent.submission_rewards.length > 0) {
             const rewardIds = liveEvent.submission_rewards.map((r: any) => r.id || r)
-            
+
             if (rewardIds.length > 0 && submissionData.user?.id) {
               // Process the reward
               await strapi.post(`/v1/reward`, {
@@ -593,6 +604,17 @@ const getLives = async () => {
   }
 }
 
+
+const getDiys = async () => {
+  try {
+    const response = await strapi.get('/diys?populate=*')
+    return response.data.data
+  } catch (error) {
+    console.log('DIYs fetch Error', error)
+    throw error
+  }
+}
+
 const getRewards = async () => {
   try {
     const response = await strapi.get('/rewards?populate=*')
@@ -663,4 +685,6 @@ export {
   getRewardById,
   getUsers,
   getLiveParticipants,
+  getDiys,
+  getActivityRequestForDiy
 }
