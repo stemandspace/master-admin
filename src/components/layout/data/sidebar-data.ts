@@ -103,6 +103,11 @@ export const sidebarData: SidebarData = {
           url: '/live-events',
           icon: IconVideo,
         },
+        {
+          title: 'Workshops',
+          url: '/workshops',
+          icon: IconTool,
+        },
       ],
     },
     {

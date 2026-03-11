@@ -615,6 +615,160 @@ const getDiys = async () => {
   }
 }
 
+const getWorkshops = async ({
+  page = 1,
+  pageSize = 10,
+}: {
+  page?: number
+  pageSize?: number
+} = {}) => {
+  try {
+    const response = await strapi.get(
+      `/workshops?populate=*&pagination[page]=${page}&pagination[pageSize]=${pageSize}&pagination[withCount]=true`
+    )
+    return {
+      data: response.data.data,
+      meta: response.data.meta,
+    }
+  } catch (error) {
+    console.log('Workshops fetch Error', error)
+    return {
+      data: [],
+      meta: {
+        pagination: {
+          page,
+          pageSize,
+          pageCount: page,
+          total: 0,
+        },
+      },
+    }
+  }
+}
+
+const getWorkshop = async ({ id }: { id: string }) => {
+  try {
+    const response = await strapi.get(
+      `/workshops/${id}?populate[workshop_programs]=*`
+    )
+    return response.data.data
+  } catch (error) {
+    console.log('Workshop fetch Error', error)
+    return null
+  }
+}
+
+const getWorkshopProgramSchedules = async ({
+  workshopRegistrationId,
+  workshopProgramIds,
+}: {
+  workshopRegistrationId?: string
+  workshopProgramIds?: (string | number)[]
+} = {}) => {
+  try {
+    let url = '/workshop-program-schedules?populate=*'
+    const filters: string[] = []
+
+    if (workshopRegistrationId) {
+      filters.push(
+        `filters[workshop_registration][id][$eq]=${encodeURIComponent(
+          String(workshopRegistrationId)
+        )}`
+      )
+    }
+
+    if (Array.isArray(workshopProgramIds) && workshopProgramIds.length > 0) {
+      const ids = workshopProgramIds
+        .map((id) => String(id).trim())
+        .filter(Boolean)
+      if (ids.length > 0) {
+        filters.push(
+          `filters[workshop_program][id][$in]=${encodeURIComponent(ids.join(','))}`
+        )
+      }
+    }
+
+    if (filters.length > 0) {
+      url += (url.includes('?') ? '&' : '?') + filters.join('&')
+    }
+
+    const response = await strapi.get(url)
+    return response.data.data
+  } catch (error) {
+    console.log('Workshop program schedules fetch Error', error)
+    return []
+  }
+}
+
+const getWorkshopRegistration = async ({ id }: { id: string }) => {
+  try {
+    const response = await strapi.get(
+      `/workshop-registrations/${id}?populate=*`
+    )
+    return response.data.data
+  } catch (error) {
+    console.log('Workshop registration fetch Error', error)
+    return null
+  }
+}
+
+const getWorkshopRegistrations = async ({
+  workshopId,
+  email,
+  page = 1,
+  pageSize = 10,
+}: {
+  workshopId: string
+  email?: string
+  page?: number
+  pageSize?: number
+}) => {
+  try {
+    // NOTE: endpoint name may differ in your Strapi; adjust if needed.
+    const baseFilters = email?.trim()
+      ? `filters[$and][0][workshop][id][$eq]=${encodeURIComponent(
+          workshopId
+        )}&filters[$and][1][email][$containsi]=${encodeURIComponent(email.trim())}`
+      : `filters[workshop][id][$eq]=${encodeURIComponent(workshopId)}`
+    const response = await strapi.get(
+      `/workshop-registrations?${baseFilters}&sort[0][createdAt]=desc&populate=*&pagination[page]=${page}&pagination[pageSize]=${pageSize}&pagination[withCount]=true`
+    )
+    return {
+      data: response.data.data,
+      meta: response.data.meta,
+    }
+  } catch (error) {
+    console.log('Workshop registrations fetch Error', error)
+    return {
+      data: [],
+      meta: {
+        pagination: {
+          page,
+          pageSize,
+          pageCount: page,
+          total: 0,
+        },
+      },
+    }
+  }
+}
+
+const getWorkshopRegistrationCount = async ({
+  workshopId,
+}: {
+  workshopId: string
+}) => {
+  try {
+    const response = await strapi.get(
+      `/workshop-registrations?filters[workshop][id][$eq]=${workshopId}&pagination[page]=1&pagination[pageSize]=1&pagination[withCount]=true`
+    )
+    return response.data?.meta?.pagination?.total ?? 0
+  } catch (error) {
+    console.log('Workshop registration count fetch Error', error)
+    return 0
+  }
+}
+
 const getRewards = async () => {
   try {
     const response = await strapi.get('/rewards?populate=*')
@@ -685,6 +839,12 @@ export {
   getRewardById,
   getUsers,
   getLiveParticipants,
+  getWorkshopProgramSchedules,
   getDiys,
+  getWorkshops,
+  getWorkshop,
+  getWorkshopRegistration,
+  getWorkshopRegistrations,
+  getWorkshopRegistrationCount,
   getActivityRequestForDiy
 }

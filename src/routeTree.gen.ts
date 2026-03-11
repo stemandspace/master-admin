@@ -34,6 +34,9 @@ const authForgotPasswordLazyImport = createFileRoute(
 const AuthenticatedSettingsRouteLazyImport = createFileRoute(
   '/_authenticated/settings',
 )()
+const AuthenticatedWorkshopsIndexLazyImport = createFileRoute(
+  '/_authenticated/workshops/',
+)()
 const AuthenticatedUsersIndexLazyImport = createFileRoute(
   '/_authenticated/users/',
 )()
@@ -67,6 +70,9 @@ const AuthenticatedAppsIndexLazyImport = createFileRoute(
 const AuthenticatedActivityRequestIndexLazyImport = createFileRoute(
   '/_authenticated/activity-request/',
 )()
+const AuthenticatedWorkshopsWorkshopIdLazyImport = createFileRoute(
+  '/_authenticated/workshops/$workshopId',
+)()
 const AuthenticatedSubmissionsSubmissionIdLazyImport = createFileRoute(
   '/_authenticated/submissions/$submissionId',
 )()
@@ -82,6 +88,13 @@ const AuthenticatedSettingsAppearanceLazyImport = createFileRoute(
 const AuthenticatedSettingsAccountLazyImport = createFileRoute(
   '/_authenticated/settings/account',
 )()
+const AuthenticatedWorkshopsWorkshopIdRegistrationsLazyImport = createFileRoute(
+  '/_authenticated/workshops/$workshopId/registrations',
+)()
+const AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyImport =
+  createFileRoute(
+    '/_authenticated/workshops/$workshopId/registrations/$registrationId',
+  )()
 
 // Create/Update Routes
 
@@ -188,6 +201,15 @@ const auth500Route = auth500Import.update({
   path: '/500',
   getParentRoute: () => rootRoute,
 } as any)
+
+const AuthenticatedWorkshopsIndexLazyRoute =
+  AuthenticatedWorkshopsIndexLazyImport.update({
+    id: '/workshops/',
+    path: '/workshops/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/workshops/index.lazy').then((d) => d.Route),
+  )
 
 const AuthenticatedUsersIndexLazyRoute =
   AuthenticatedUsersIndexLazyImport.update({
@@ -301,6 +323,17 @@ const AuthenticatedActivityRequestIndexLazyRoute =
     ),
   )
 
+const AuthenticatedWorkshopsWorkshopIdLazyRoute =
+  AuthenticatedWorkshopsWorkshopIdLazyImport.update({
+    id: '/workshops/$workshopId',
+    path: '/workshops/$workshopId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/workshops/$workshopId.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const AuthenticatedSubmissionsSubmissionIdLazyRoute =
   AuthenticatedSubmissionsSubmissionIdLazyImport.update({
     id: '/submissions/$submissionId',
@@ -354,6 +387,29 @@ const AuthenticatedSettingsAccountLazyRoute =
     import('./routes/_authenticated/settings/account.lazy').then(
       (d) => d.Route,
     ),
+  )
+
+const AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRoute =
+  AuthenticatedWorkshopsWorkshopIdRegistrationsLazyImport.update({
+    id: '/registrations',
+    path: '/registrations',
+    getParentRoute: () => AuthenticatedWorkshopsWorkshopIdLazyRoute,
+  } as any).lazy(() =>
+    import(
+      './routes/_authenticated/workshops/$workshopId/registrations.lazy'
+    ).then((d) => d.Route),
+  )
+
+const AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyRoute =
+  AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyImport.update({
+    id: '/$registrationId',
+    path: '/$registrationId',
+    getParentRoute: () =>
+      AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRoute,
+  } as any).lazy(() =>
+    import(
+      './routes/_authenticated/workshops/$workshopId/registrations/$registrationId.lazy'
+    ).then((d) => d.Route),
   )
 
 // Populate the FileRoutesByPath interface
@@ -493,6 +549,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSubmissionsSubmissionIdLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/workshops/$workshopId': {
+      id: '/_authenticated/workshops/$workshopId'
+      path: '/workshops/$workshopId'
+      fullPath: '/workshops/$workshopId'
+      preLoaderRoute: typeof AuthenticatedWorkshopsWorkshopIdLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/activity-request/': {
       id: '/_authenticated/activity-request/'
       path: '/activity-request'
@@ -570,6 +633,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersIndexLazyImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/workshops/': {
+      id: '/_authenticated/workshops/'
+      path: '/workshops'
+      fullPath: '/workshops'
+      preLoaderRoute: typeof AuthenticatedWorkshopsIndexLazyImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/workshops/$workshopId/registrations': {
+      id: '/_authenticated/workshops/$workshopId/registrations'
+      path: '/registrations'
+      fullPath: '/workshops/$workshopId/registrations'
+      preLoaderRoute: typeof AuthenticatedWorkshopsWorkshopIdRegistrationsLazyImport
+      parentRoute: typeof AuthenticatedWorkshopsWorkshopIdLazyImport
+    }
+    '/_authenticated/workshops/$workshopId/registrations/$registrationId': {
+      id: '/_authenticated/workshops/$workshopId/registrations/$registrationId'
+      path: '/$registrationId'
+      fullPath: '/workshops/$workshopId/registrations/$registrationId'
+      preLoaderRoute: typeof AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyImport
+      parentRoute: typeof AuthenticatedWorkshopsWorkshopIdRegistrationsLazyImport
+    }
   }
 }
 
@@ -601,10 +685,41 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
     AuthenticatedSettingsRouteLazyRouteChildren,
   )
 
+interface AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteChildren {
+  AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyRoute: typeof AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyRoute
+}
+
+const AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteChildren: AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteChildren =
+  {
+    AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyRoute:
+      AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyRoute,
+  }
+
+const AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteWithChildren =
+  AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRoute._addFileChildren(
+    AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteChildren,
+  )
+
+interface AuthenticatedWorkshopsWorkshopIdLazyRouteChildren {
+  AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRoute: typeof AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteWithChildren
+}
+
+const AuthenticatedWorkshopsWorkshopIdLazyRouteChildren: AuthenticatedWorkshopsWorkshopIdLazyRouteChildren =
+  {
+    AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRoute:
+      AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteWithChildren,
+  }
+
+const AuthenticatedWorkshopsWorkshopIdLazyRouteWithChildren =
+  AuthenticatedWorkshopsWorkshopIdLazyRoute._addFileChildren(
+    AuthenticatedWorkshopsWorkshopIdLazyRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedSubmissionsSubmissionIdLazyRoute: typeof AuthenticatedSubmissionsSubmissionIdLazyRoute
+  AuthenticatedWorkshopsWorkshopIdLazyRoute: typeof AuthenticatedWorkshopsWorkshopIdLazyRouteWithChildren
   AuthenticatedActivityRequestIndexLazyRoute: typeof AuthenticatedActivityRequestIndexLazyRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedChallengesIndexLazyRoute: typeof AuthenticatedChallengesIndexLazyRoute
@@ -615,6 +730,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSubmissionsIndexLazyRoute: typeof AuthenticatedSubmissionsIndexLazyRoute
   AuthenticatedTasksIndexLazyRoute: typeof AuthenticatedTasksIndexLazyRoute
   AuthenticatedUsersIndexLazyRoute: typeof AuthenticatedUsersIndexLazyRoute
+  AuthenticatedWorkshopsIndexLazyRoute: typeof AuthenticatedWorkshopsIndexLazyRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -623,6 +739,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedSubmissionsSubmissionIdLazyRoute:
     AuthenticatedSubmissionsSubmissionIdLazyRoute,
+  AuthenticatedWorkshopsWorkshopIdLazyRoute:
+    AuthenticatedWorkshopsWorkshopIdLazyRouteWithChildren,
   AuthenticatedActivityRequestIndexLazyRoute:
     AuthenticatedActivityRequestIndexLazyRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
@@ -635,6 +753,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedSubmissionsIndexLazyRoute,
   AuthenticatedTasksIndexLazyRoute: AuthenticatedTasksIndexLazyRoute,
   AuthenticatedUsersIndexLazyRoute: AuthenticatedUsersIndexLazyRoute,
+  AuthenticatedWorkshopsIndexLazyRoute: AuthenticatedWorkshopsIndexLazyRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -659,6 +778,7 @@ export interface FileRoutesByFullPath {
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/submissions/$submissionId': typeof AuthenticatedSubmissionsSubmissionIdLazyRoute
+  '/workshops/$workshopId': typeof AuthenticatedWorkshopsWorkshopIdLazyRouteWithChildren
   '/activity-request': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/challenges': typeof AuthenticatedChallengesIndexLazyRoute
@@ -670,6 +790,9 @@ export interface FileRoutesByFullPath {
   '/submissions': typeof AuthenticatedSubmissionsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
+  '/workshops': typeof AuthenticatedWorkshopsIndexLazyRoute
+  '/workshops/$workshopId/registrations': typeof AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteWithChildren
+  '/workshops/$workshopId/registrations/$registrationId': typeof AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyRoute
 }
 
 export interface FileRoutesByTo {
@@ -689,6 +812,7 @@ export interface FileRoutesByTo {
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/submissions/$submissionId': typeof AuthenticatedSubmissionsSubmissionIdLazyRoute
+  '/workshops/$workshopId': typeof AuthenticatedWorkshopsWorkshopIdLazyRouteWithChildren
   '/activity-request': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/challenges': typeof AuthenticatedChallengesIndexLazyRoute
@@ -700,6 +824,9 @@ export interface FileRoutesByTo {
   '/submissions': typeof AuthenticatedSubmissionsIndexLazyRoute
   '/tasks': typeof AuthenticatedTasksIndexLazyRoute
   '/users': typeof AuthenticatedUsersIndexLazyRoute
+  '/workshops': typeof AuthenticatedWorkshopsIndexLazyRoute
+  '/workshops/$workshopId/registrations': typeof AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteWithChildren
+  '/workshops/$workshopId/registrations/$registrationId': typeof AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyRoute
 }
 
 export interface FileRoutesById {
@@ -723,6 +850,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/_authenticated/submissions/$submissionId': typeof AuthenticatedSubmissionsSubmissionIdLazyRoute
+  '/_authenticated/workshops/$workshopId': typeof AuthenticatedWorkshopsWorkshopIdLazyRouteWithChildren
   '/_authenticated/activity-request/': typeof AuthenticatedActivityRequestIndexLazyRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/challenges/': typeof AuthenticatedChallengesIndexLazyRoute
@@ -734,6 +862,9 @@ export interface FileRoutesById {
   '/_authenticated/submissions/': typeof AuthenticatedSubmissionsIndexLazyRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexLazyRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexLazyRoute
+  '/_authenticated/workshops/': typeof AuthenticatedWorkshopsIndexLazyRoute
+  '/_authenticated/workshops/$workshopId/registrations': typeof AuthenticatedWorkshopsWorkshopIdRegistrationsLazyRouteWithChildren
+  '/_authenticated/workshops/$workshopId/registrations/$registrationId': typeof AuthenticatedWorkshopsWorkshopIdRegistrationsRegistrationIdLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -757,6 +888,7 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/submissions/$submissionId'
+    | '/workshops/$workshopId'
     | '/activity-request'
     | '/apps'
     | '/challenges'
@@ -768,6 +900,9 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/tasks'
     | '/users'
+    | '/workshops'
+    | '/workshops/$workshopId/registrations'
+    | '/workshops/$workshopId/registrations/$registrationId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/500'
@@ -786,6 +921,7 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/submissions/$submissionId'
+    | '/workshops/$workshopId'
     | '/activity-request'
     | '/apps'
     | '/challenges'
@@ -797,6 +933,9 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/tasks'
     | '/users'
+    | '/workshops'
+    | '/workshops/$workshopId/registrations'
+    | '/workshops/$workshopId/registrations/$registrationId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -818,6 +957,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/submissions/$submissionId'
+    | '/_authenticated/workshops/$workshopId'
     | '/_authenticated/activity-request/'
     | '/_authenticated/apps/'
     | '/_authenticated/challenges/'
@@ -829,6 +969,9 @@ export interface FileRouteTypes {
     | '/_authenticated/submissions/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
+    | '/_authenticated/workshops/'
+    | '/_authenticated/workshops/$workshopId/registrations'
+    | '/_authenticated/workshops/$workshopId/registrations/$registrationId'
   fileRoutesById: FileRoutesById
 }
 
@@ -892,6 +1035,7 @@ export const routeTree = rootRoute
         "/_authenticated/settings",
         "/_authenticated/",
         "/_authenticated/submissions/$submissionId",
+        "/_authenticated/workshops/$workshopId",
         "/_authenticated/activity-request/",
         "/_authenticated/apps/",
         "/_authenticated/challenges/",
@@ -901,7 +1045,8 @@ export const routeTree = rootRoute
         "/_authenticated/live-events/",
         "/_authenticated/submissions/",
         "/_authenticated/tasks/",
-        "/_authenticated/users/"
+        "/_authenticated/users/",
+        "/_authenticated/workshops/"
       ]
     },
     "/(auth)/500": {
@@ -972,6 +1117,13 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/submissions/$submissionId.lazy.tsx",
       "parent": "/_authenticated"
     },
+    "/_authenticated/workshops/$workshopId": {
+      "filePath": "_authenticated/workshops/$workshopId.lazy.tsx",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/workshops/$workshopId/registrations"
+      ]
+    },
     "/_authenticated/activity-request/": {
       "filePath": "_authenticated/activity-request/index.lazy.tsx",
       "parent": "/_authenticated"
@@ -1015,6 +1167,21 @@ export const routeTree = rootRoute
     "/_authenticated/users/": {
       "filePath": "_authenticated/users/index.lazy.tsx",
       "parent": "/_authenticated"
+    },
+    "/_authenticated/workshops/": {
+      "filePath": "_authenticated/workshops/index.lazy.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/workshops/$workshopId/registrations": {
+      "filePath": "_authenticated/workshops/$workshopId/registrations.lazy.tsx",
+      "parent": "/_authenticated/workshops/$workshopId",
+      "children": [
+        "/_authenticated/workshops/$workshopId/registrations/$registrationId"
+      ]
+    },
+    "/_authenticated/workshops/$workshopId/registrations/$registrationId": {
+      "filePath": "_authenticated/workshops/$workshopId/registrations/$registrationId.lazy.tsx",
+      "parent": "/_authenticated/workshops/$workshopId/registrations"
     }
   }
 }
