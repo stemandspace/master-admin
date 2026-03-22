@@ -769,6 +769,42 @@ const getWorkshopRegistrationCount = async ({
   }
 }
 
+const downloadWorkshopRegistrationCsv = async ({
+  workshopId,
+}: {
+  workshopId: string
+}) => {
+  try {
+    const response = await strapi.get(`/v1/workshop-registration-csv-export`, {
+      params: { workshopId },
+      responseType: 'blob',
+    })
+    const blob = response.data as Blob
+    const disposition = response.headers['content-disposition'] as string | undefined
+    let filename = `workshop-${workshopId}-registrations.csv`
+    if (disposition?.includes('filename=')) {
+      const match =
+        /filename\*?=(?:UTF-8'')?["']?([^";\n]+)["']?/i.exec(disposition)
+      if (match?.[1]) filename = decodeURIComponent(match[1].trim())
+    }
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.log('Workshop registration CSV export Error', error)
+    toast({
+      title: 'Download failed',
+      description: 'Could not export registrations CSV.',
+      variant: 'destructive',
+    })
+  }
+}
+
 const getRewards = async () => {
   try {
     const response = await strapi.get('/rewards?populate=*')
@@ -846,5 +882,6 @@ export {
   getWorkshopRegistration,
   getWorkshopRegistrations,
   getWorkshopRegistrationCount,
+  downloadWorkshopRegistrationCsv,
   getActivityRequestForDiy
 }

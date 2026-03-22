@@ -1,8 +1,13 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, useParams, useSearch, useRouter, useRouterState } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { useDebouncedValue } from '@mantine/hooks'
-import { getWorkshop, getWorkshopRegistrations } from '@/utils/fetcher-functions'
+import {
+  downloadWorkshopRegistrationCsv,
+  getWorkshop,
+  getWorkshopRegistrations,
+} from '@/utils/fetcher-functions'
 import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -60,6 +65,8 @@ export default function WorkshopRegistrations() {
     placeholderData: (prev) => prev,
   })
 
+  const [csvDownloading, setCsvDownloading] = useState(false)
+
   const rows = Array.isArray(data?.data) ? data.data : []
   const pagination = data?.meta?.pagination
   const pageCount = pagination?.pageCount ?? 1
@@ -68,51 +75,63 @@ export default function WorkshopRegistrations() {
   const canNext = page < pageCount
 
   const getRegistrantName = (r: any) => {
-    return (
+    const raw =
       r?.name ??
       r?.fullName ??
       (r?.user
         ? `${r.user?.firstname ?? ''} ${r.user?.lastname ?? ''}`.trim() ||
-        r.user?.username
+          r.user?.username
         : undefined) ??
-      r?.attributes?.name ??
-      '—'
-    )
+      r?.attributes?.name
+    if (raw == null || String(raw).trim() === '') return 'NULL'
+    return String(raw)
   }
 
   const getRegistrantEmail = (r: any) => {
-    return r?.email ?? r?.user?.email ?? r?.attributes?.email ?? '—'
+    const raw =
+      r?.email ?? r?.user?.email ?? r?.attributes?.email
+    if (raw == null || String(raw).trim() === '') return 'NULL'
+    return String(raw)
   }
 
   const getWorkshopId = (r: any) => {
-    // Common Strapi shapes: r.workshop, r.workshop.data.attributes, etc.
     const w = r?.workshop
-    return (
-      w?.id ?? '—'
-    )
+    const id = w?.id
+    if (id == null || id === '') return 'NULL'
+    return String(id)
   }
 
   const getWorkshopProgramId = (r: any) => {
-    const w = r?.workshop_programs.map((p: any) => p.id).join(', ')
-    return (
-      w ?? '—'
-    )
+    const programs = r?.workshop_programs
+    if (!Array.isArray(programs) || programs.length === 0) return 'NULL'
+    const joined = programs.map((p: any) => p?.id).filter((id: unknown) => id != null && id !== '').join(', ')
+    return joined || 'NULL'
   }
 
   const getGrade = (r: any) => {
-    return r?.grade ?? '—'
+    const g = r?.grade
+    if (g == null || String(g).trim() === '') return 'NULL'
+    return String(g)
   }
 
   const getAddons = (r: any) => {
-    return r?.addons?.map((a: any) => a?.name).join(', ') ?? '—'
+    if (!Array.isArray(r?.addons) || r.addons.length === 0) return 'NULL'
+    const joined = r.addons
+      .map((a: any) => a?.name)
+      .filter((n: unknown) => n != null && String(n).trim() !== '')
+      .join(', ')
+    return joined || 'NULL'
   }
 
   const getTotalAmountPaid = (r: any) => {
     if (!Array.isArray(r?.workshop_payments) || r.workshop_payments.length === 0) {
-      return '—'
+      return 'NULL'
     }
-    const sum = r.workshop_payments.reduce((acc: number, curr: any) => acc + (Number(curr.amount) || 0), 0)
-    return sum > 0 ? `₹ ${Math.round(sum / 100)}` : '—'
+    const sum = r.workshop_payments.reduce(
+      (acc: number, curr: any) => acc + (Number(curr.amount) || 0),
+      0
+    )
+    return sum > 0 ? `₹ ${Math.round(sum / 100)}` : 'NULL'
   }
 
   return (
@@ -224,6 +243,25 @@ export default function WorkshopRegistrations() {
               Clear
             </Button>
           ) : null}
+          <Button
+            variant='outline'
+            size='sm'
+            className='ml-auto'
+            disabled={csvDownloading}
+            onClick={async () => {
+              setCsvDownloading(true)
+              try {
+                await downloadWorkshopRegistrationCsv({
+                  workshopId: String(workshopId),
+                })
+              } finally {
+                setCsvDownloading(false)
+              }
+            }}
+          >
+            <Download className='mr-2 h-4 w-4' />
+            {csvDownloading ? 'Downloading…' : 'Download sheet'}
+          </Button>
         </div>
 
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1'>
@@ -253,11 +291,13 @@ export default function WorkshopRegistrations() {
                   rows.map((r: any) => (
                     <TableRow
                       style={{
-                        backgroundColor: r?.email.includes('@spacetopia.in') ? 'lightcyan' : 'transparent',
+                        backgroundColor: r?.email?.includes('@spacetopia.in')
+                          ? 'lightcyan'
+                          : 'transparent',
                       }}
                       key={String(r?.id ?? Math.random())}>
                       <TableCell className='font-mono text-xs'>
-                        {String(r?.id ?? '—')}
+                        {r?.id != null && r.id !== '' ? String(r.id) : 'NULL'}
                       </TableCell>
                       <TableCell className='text-nowrap'>
                         {getRegistrantName(r)}

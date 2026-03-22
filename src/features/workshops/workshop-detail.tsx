@@ -165,20 +165,13 @@ export default function WorkshopDetail() {
           <div className='rounded-lg border bg-card p-6 shadow-sm'>
             <h3 className='mb-4 text-lg font-semibold'>Workshop Programs</h3>
             {Array.isArray(programs) && programs.length ? (
-              <div className='space-y-3'>
-                {programs.map((p: any) => {
+              <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+                {programs.map((p: any, index: number) => {
                   const id = p?.id ?? p?.documentId ?? ''
                   const title =
                     p?.title ?? p?.name ?? (id ? `Program ${id}` : 'Untitled program')
-                  const desc = p?.desc ?? p?.description ?? ''
                   const grade = p?.grade ?? ''
                   const price = p?.price ?? ''
-                  const createdAt = p?.createdAt
-                    ? new Date(p.createdAt).toLocaleDateString()
-                    : null
-                  const updatedAt = p?.updatedAt
-                    ? new Date(p.updatedAt).toLocaleDateString()
-                    : null
 
                   const gradeBadges = String(grade)
                     .split(',')
@@ -187,8 +180,8 @@ export default function WorkshopDetail() {
 
                   return (
                     <div
-                      key={String(id || Math.random())}
-                      className='flex flex-col gap-3 rounded-md border bg-muted/40 p-4 md:flex-row md:items-center md:justify-between'
+                      key={String(id || `program-${index}`)}
+                      className='flex h-full flex-col gap-3 rounded-md border bg-muted/40 p-4'
                     >
                       <div className='space-y-1'>
                         <div className='flex flex-wrap items-center gap-2'>
@@ -199,9 +192,9 @@ export default function WorkshopDetail() {
                             </span>
                           )}
                         </div>
-                        {desc && (
+                        {/* {desc && (
                           <p className='text-xs text-muted-foreground'>{desc}</p>
-                        )}
+                        )} */}
                         <div className='mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground'>
                           {gradeBadges.length > 0 && (
                             <div className='flex flex-wrap items-center gap-1'>
@@ -226,7 +219,7 @@ export default function WorkshopDetail() {
                           )}
                         </div>
                       </div>
-
+                      {/* 
                       <div className='flex flex-col items-start gap-1 text-[11px] text-muted-foreground md:items-end'>
                         {createdAt && (
                           <span>
@@ -240,7 +233,7 @@ export default function WorkshopDetail() {
                             <span className='font-mono text-xs'>{updatedAt}</span>
                           </span>
                         )}
-                      </div>
+                      </div> */}
                     </div>
                   )
                 })}
